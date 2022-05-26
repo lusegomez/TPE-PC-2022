@@ -3,7 +3,7 @@ COMPILER=gcc
 CFLAGS = -Wall -fsanitize=address -g
 all: addrinfo tcpEchoClient tcpEchoServer udpEchoServer udpEchoClient
 clean:	
-	- rm -f *.o  addrinfo tcpEchoclient tcpEchoServer udpEchoServer udpEchoClient
+	- rm -f *.o  addrinfo tcpEchoClient tcpEchoServer udpEchoServer udpEchoClient
 
 COMMON =  logger.c util.c
 addrinfo:      
