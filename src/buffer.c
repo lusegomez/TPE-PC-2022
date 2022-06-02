@@ -8,6 +8,21 @@
 
 #include "buffer.h"
 
+#define MIN_SIZE = 256;
+#define SIZE = 4096;
+
+uint64_t get_buff_size() {
+    return SIZE;
+}
+
+int set_buff_size(uint64_t size){
+    if(size < MIN_SIZE) {
+        return -1;
+    }
+    SIZE = size;
+    return 0;
+}
+
 inline void
 buffer_reset(buffer *b) {
     b->read  = b->data;

@@ -23,9 +23,9 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include "selector.h"
+#include "socks5.h"
 
 /*
-#include "socks5.h"
 #include "socks5nio.h"
 */
 static bool done = false;
@@ -158,7 +158,7 @@ finally:
     }
     selector_close();
 
-    socksv5_pool_destroy();
+    //socksv5_pool_destroy();
 
     if(server >= 0) {
         close(server);
