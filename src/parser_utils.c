@@ -2,7 +2,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "parser_utils.h"
+#include "./includes/parser_utils.h"
 
 const char *
 parser_utils_strcmpi_event(const enum string_cmp_event_types type) {
@@ -56,7 +56,7 @@ neq(struct parser_event *ret, const uint8_t c) {
  * static const struct parser_state_transition ST_1 [] =  {
  *   {.when = 'O',        .dest = 2,         .action1 = may_eq, },
  *   {.when = 'o',        .dest = 2,         .action1 = may_eq, },
- *   {.when = ANY,        .dest = NEQ,       .action1 = neq,},
+ *   {.when = ANY,        .dest = NEQ,       .action1 = nqe,},
  * };
  * static const struct parser_state_transition ST_2 [] =  {
  *   {.when = 'O',        .dest = EQ,        .action1 = eq, },

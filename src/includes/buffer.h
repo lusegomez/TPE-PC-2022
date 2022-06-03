@@ -98,6 +98,7 @@ struct buffer {
 
 
 uint64_t get_buff_size();
+
 int set_buff_size(uint64_t size);
 /**
  * inicializa el buffer sin utilizar el heap

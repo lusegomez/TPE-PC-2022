@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <check.h>
 
 // asi se puede probar las funciones internas
 #include "buffer.c"

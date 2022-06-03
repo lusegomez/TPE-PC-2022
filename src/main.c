@@ -22,8 +22,8 @@
 #include <sys/socket.h>  // socket
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include "selector.h"
-#include "socks5.h"
+#include "./includes/selector.h"
+#include "./includes/socks5.h"
 
 /*
 #include "socks5nio.h"

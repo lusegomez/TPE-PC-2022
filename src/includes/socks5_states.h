@@ -1,3 +1,9 @@
+#ifndef SOCKS5_STATE
+#define SOCKS5_STATE
+
+#include "../state_machines/includes/hello_stm.h"
+#include "stm.h"
+
 enum socks5_state {
     HELLO_READING,
     HELLO_WRITING,
@@ -21,6 +27,7 @@ const struct state_definition states_definition[] = {
         .on_arrival = hello_read_init,
         .on_read_ready = hello_read
     },
+    /*
     {
         .state = HELLO_WRITING,
         .on_arrival = hello_write_init,
@@ -41,7 +48,6 @@ const struct state_definition states_definition[] = {
         .on_arrival = request_reading_init,
         .on_read_ready = request_reading
     },
-    /*
     {
         .state = DNS_QUERY,
         .on_arrival = dns_query_init,
@@ -52,7 +58,6 @@ const struct state_definition states_definition[] = {
         .on_arrival = dns_response_init,
         .on_read_ready = dns_response
     },
-    */
     {
         .state = CONNECT_ORIGIN,
         .on_arrival = connect_origin_init,
@@ -77,4 +82,7 @@ const struct state_definition states_definition[] = {
         .state = ERROR,
         .on_arrival = error_init,
     },
-}
+    */
+};
+
+#endif

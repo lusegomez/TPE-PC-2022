@@ -6,10 +6,10 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "buffer.h"
+#include "./includes/buffer.h"
 
-#define MIN_SIZE = 256;
-#define SIZE = 4096;
+#define MIN_SIZE 256
+uint64_t SIZE = 4096;
 
 uint64_t get_buff_size() {
     return SIZE;

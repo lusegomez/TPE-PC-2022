@@ -1,11 +1,11 @@
 .PHONY=clean all
 COMPILER=gcc
-CFLAGS = -Wall -fsanitize=address -g
+CFLAGS = -Wall -fsanitize=address -g -pthread
 all: main 
 clean:	
 	- rm -f *.o  main
 
-COMMON = stm.c selector.c socks5.c
+COMMON = stm.c selector.c socks5.c ./state_machines/hello_stm.c buffer.c
 
 main:      
 	$(COMPILER) $(CFLAGS) -o main main.c $(COMMON)
