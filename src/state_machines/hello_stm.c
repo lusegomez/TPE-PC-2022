@@ -26,6 +26,7 @@ void hello_read_init(const unsigned state, struct selector_key *key) {
     buffer_init(&stm->write_buffer, get_buff_size(), stm->write_buffer_data);
 
     //TODO: Init parser
+    stm->parser = parser_init(parser_no_classes())
 }
 
 unsigned hello_read(struct selector_key * key) {

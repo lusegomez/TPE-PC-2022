@@ -22,11 +22,12 @@ enum socks5_state {
 };
 
 const struct state_definition states_definition[] = {
-    {
+    /*{
         .state = HELLO_READING,
         .on_arrival = hello_read_init,
         .on_read_ready = hello_read
     },
+    */
     /*
     {
         .state = HELLO_WRITING,

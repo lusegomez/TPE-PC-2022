@@ -4,7 +4,7 @@
 #include "stm.h"
 #include "selector.h"
 #include <stdint.h>
-#include "../state_machines/includes/hello_stm.h"
+//#include "../state_machines/includes/hello_stm.h"
 
 
 struct socks5 {
@@ -12,12 +12,13 @@ struct socks5 {
     int origin_fd;
 
     char * client_ip;
+    socklen_t client_addr_len;
     uint16_t client_port;
     char * origin_ip;
     uint16_t origin_port;
     //struct users current_users;
 
-    struct hello_stm hello_stm;
+   // struct hello_stm hello_stm;
     //struct hello_auth_stm hello_auth_stm;
     //struct request_stm request_stm;
     //struct dns_stm dns_stm;

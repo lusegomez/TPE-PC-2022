@@ -3,8 +3,11 @@
 
 #include "../../includes/buffer.h"
 #include "../../includes/selector.h"
+#include "../../includes/parser.h"
+
 
 struct hello_stm {
+    struct parser * parser;
    // struct hello_parser parser;
     buffer read_buffer;
     buffer write_buffer;
