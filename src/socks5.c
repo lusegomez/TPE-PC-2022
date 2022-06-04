@@ -2,11 +2,12 @@
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "./includes/socks5.h"
 #include "./includes/selector.h"
 #include "./includes/socks5_states.h"
 
-
+#define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
 struct socks5 * create_new_sock5(int client_fd) {
     struct socks5 * sock = calloc(1,sizeof(struct socks5));
@@ -92,9 +93,7 @@ fail:
 
 
 void socks5_handle_read(struct selector_key * key) {
-    struct socks5 * sock = ((struct socks5*)(key)-> data);
-    struct state_machine *stm = &(sock->stm);
-
+    struct state_machine *stm = &ATTACHMENT(key)->stm;
     enum socks5_state state = stm_handler_read(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
         destroy_socks5(key);
@@ -102,8 +101,7 @@ void socks5_handle_read(struct selector_key * key) {
 
 }
 void socks5_handle_write(struct selector_key * key){
-    struct socks5 * sock = ((struct socks5*)key-> data);
-    struct state_machine *stm = &(sock->stm);
+    struct state_machine *stm = &ATTACHMENT(key)->stm;
 
     enum socks5_state state = stm_handler_write(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
@@ -113,8 +111,7 @@ void socks5_handle_write(struct selector_key * key){
 
 }
 void socks5_handle_block(struct selector_key * key) {
-    struct socks5 * sock = ((struct socks5*)key-> data);
-    struct state_machine *stm = &(sock->stm);
+    struct state_machine *stm = &ATTACHMENT(key)->stm;
 
     enum socks5_state state = stm_handler_block(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
@@ -123,8 +120,7 @@ void socks5_handle_block(struct selector_key * key) {
 
 }
 void socks5_handle_close(struct selector_key * key) {
-    struct socks5 * sock = ((struct socks5*)key-> data);
-    struct state_machine *stm = &(sock->stm);
+    struct state_machine *stm = &ATTACHMENT(key)->stm;
 
     stm_handler_close(stm, key);
     //TODO: Se deberia manejar error aca?

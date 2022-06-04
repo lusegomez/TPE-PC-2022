@@ -9,8 +9,10 @@
 #include "../includes/socks5_states.h"
 #include "../parsers/includes/hello_parser.h"
 
+#define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+
 void hello_read_init(const unsigned state, struct selector_key *key) {
-    struct hello_stm * stm = &((struct socks5*)key->data)-> hello_stm;
+    struct hello_stm * stm = &ATTACHMENT(key)->hello_stm;
     stm->selected_method = -1;
 
     stm->read_buffer_data = calloc(get_buff_size(), sizeof(uint8_t));
@@ -26,11 +28,11 @@ void hello_read_init(const unsigned state, struct selector_key *key) {
     buffer_init(&stm->write_buffer, get_buff_size(), stm->write_buffer_data);
 
     //TODO: Init parser
-    stm->parser = parser_init(parser_no_classes())
+    stm->parser = parser_init(parser_no_classes());
 }
 
 unsigned hello_read(struct selector_key * key) {
-    struct hello_stm * stm = &((struct socks5*)key->data)-> hello_stm;
+    struct hello_stm * stm = &ATTACHMENT(key)->hello_stm;
     size_t nbytes;
     uint8_t * pointer = buffer_write_ptr(&stm->read_buffer, &nbytes);
     ssize_t ret = recv(key->fd, pointer, nbytes, 0);
