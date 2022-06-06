@@ -4,28 +4,48 @@
 #include "stm.h"
 #include "selector.h"
 #include <stdint.h>
+#include "buffer.h"
 //#include "../state_machines/includes/hello_stm.h"
 
 
-struct socks5 {
-    int client_fd;
-    int origin_fd;
+#define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+#define MAX_POOL 500
+#define BUFFER_SIZE 2048
 
-    char * client_ip;
+struct socks5 {
+    //Client data
+    int client_fd;
+    struct sockaddr_storage client_addr;
     socklen_t client_addr_len;
-    uint16_t client_port;
-    char * origin_ip;
-    uint16_t origin_port;
+
+    //Origin data
+    int origin_fd;
+    struct sockaddr_storage origin_addr;
+    socklen_t origin_addr_len;
+    int origin_domain;
+    struct addrinfo *origin_resolution;
+    struct addrinfo *current_origin_resolution;
+
     //struct users current_users;
 
-   // struct hello_stm hello_stm;
-    //struct hello_auth_stm hello_auth_stm;
-    //struct request_stm request_stm;
-    //struct dns_stm dns_stm;
-    //struct connect_origin_stm connect_origin_stm;
-    //struct copy_stm copy_stm;
+//    struct hello_st hello;
+//    struct request_st request;
+//    struct copy copy;
+//
+//    struct connecting conn;
+//    struct copy copy_origin;
+
+
     struct state_machine stm;
-    //struct error_stm error_stm;
+
+    // Buffers
+    buffer read_buffer; // client --> origin
+    uint8_t read_raw_buff[BUFFER_SIZE];
+    buffer write_buffer; // origin --> client
+    uint8_t write_raw_buff[BUFFER_SIZE];
+
+    unsigned int references;
+    struct socks5 * next;
 
 };
 
