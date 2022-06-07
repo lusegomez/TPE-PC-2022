@@ -166,18 +166,15 @@ destroy_socks5(struct socks5 *s) {
     }
 }
 
-void socks_pool_destroy() {
-    struct socks5 *next, *s;
-    for(s = pool; s != NULL ; s = next) {
-        if (s != s->next)
-        {
+void
+socksv5_pool_destroy(void) {
+     struct socks5 *next, *s;
+     for(s = pool; s != NULL ; s = next) {
             next = s->next;
-        }
-        else
-            next = NULL;
-        free(s);
-    }
+             free(s);
+         }
 }
+
 //
 //struct socks5 * create_new_sock5(int client_fd) {
 //
@@ -281,7 +278,7 @@ void socks5_handle_read(struct selector_key * key) {
     struct state_machine *stm = &ATTACHMENT(key)->stm;
     enum socks5_state state = stm_handler_read(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5((struct socks5 *) key);
+        destroy_socks5((struct socks5 *) key); //TODO: Cambiar por socks5_done (aca significa que hubo un error y hay que terminar el proxy)
     }
 
 }
@@ -290,7 +287,7 @@ void socks5_handle_write(struct selector_key * key){
 
     enum socks5_state state = stm_handler_write(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5((struct socks5 *)key);
+        destroy_socks5((struct socks5 *)key);//TODO: Cambiar por socks5_done (aca significa que hubo un error y hay que terminar el proxy)
 
     }
 
@@ -300,7 +297,7 @@ void socks5_handle_block(struct selector_key * key) {
 
     enum socks5_state state = stm_handler_block(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5((struct socks5 *)key);
+        destroy_socks5((struct socks5 *)key);//TODO: Cambiar por socks5_done (aca significa que hubo un error y hay que terminar el proxy)
     }
 
 }
