@@ -1,6 +1,6 @@
 .PHONY=clean all
 CFLAGS = --std=c11 -pedantic -pedantic-errors -g -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough -D_POSIX_C_SOURCE=200112L
-LDFLAGS = -lpthread
+LDFLAGS = -lpthread -pthread
 all: main
 clean:
 	- rm -f *.o ./state_machines/*.o main

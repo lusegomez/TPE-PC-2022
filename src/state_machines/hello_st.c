@@ -66,7 +66,7 @@ unsigned hello_read(struct selector_key * key) {
 
 
 unsigned hello_write(struct selector_key * key) {
-    struct socks5 * sock = ATTACHMENT(key);
+    //struct socks5 * sock = ATTACHMENT(key);
     size_t nbytes = 5;
     char * pointer = "0x05";
     ssize_t ret = send(key->fd, pointer, nbytes, 0);
