@@ -28,7 +28,7 @@ struct socks5 {
 
     //struct users current_users;
 
-    struct hello_st hello;
+    struct hello_st * hello;
 //    struct request_st request;
 //    struct copy copy;
 //

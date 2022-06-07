@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
 
-#include "../includes/buffer.h"
-#include "./includes/hello_stm.h"
-#include "../includes/socks5.h"
-#include "../includes/socks5_states.h"
-#include "../parsers/includes/hello_parser.h"
 #include "../includes/parser_utils.h"
+#include "./includes/hello_st.h"
+#include "../includes/socks5_states.h"
+#include "../includes/socks5.h"
+
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
@@ -24,13 +24,14 @@ void destroy_parser_definition(struct hello_st * st){
     free(st->ver_def);
 }
 
-struct sock5 * initialize_parsers(struct sock5 * sock) {
-    sock->hello.ver_parser = parser_init(parser_no_classes(), sock->hello.ver_def);
-    return sock;
+void initialize_parsers(struct selector_key * key) {
+    struct socks5 * sock = ATTACHMENT(key);
+    sock->hello->ver_parser = parser_init(parser_no_classes(), sock->hello->ver_def);
+
 }
 
 void hello_init(const unsigned state, struct selector_key *key) {
-    struct hello_st * st = &ATTACHMENT(key)->hello;
+    struct hello_st * st = ATTACHMENT(key)->hello;
     st->selected_method = -1;
 
     //TODO: Init parser
@@ -46,7 +47,7 @@ unsigned hello_read(struct selector_key * key) {
 
     uint8_t ret_state = HELLO;
     for(int i = 0; i < ret; i++) {
-        const struct parser_event * state = parser_feed(sock->hello.ver_parser, pointer[i]);
+        const struct parser_event * state = parser_feed(sock->hello->ver_parser, pointer[i]);
         if(state->type == STRING_CMP_EQ) {
             if(selector_set_interest(key->s, sock->client_fd, OP_WRITE) != SELECTOR_SUCCESS) {
                 return ERROR;
@@ -55,7 +56,7 @@ unsigned hello_read(struct selector_key * key) {
             return ERROR;
         }
     }
-    parser_reset(sock->hello.ver_parser);
+    parser_reset(sock->hello->ver_parser);
     buffer_write_adv(&sock->write_buffer, ret);
 
     return ret_state;
@@ -65,7 +66,7 @@ unsigned hello_read(struct selector_key * key) {
 unsigned hello_write(struct selector_key * key) {
     struct socks5 * sock = ATTACHMENT(key);
     size_t nbytes = 5;
-    uint8_t * pointer = "0X05";
+    char * pointer = "0x05";
     ssize_t ret = send(key->fd, pointer, nbytes, 0);
     if(ret <= 0) {
         //TODO: Agregar logs

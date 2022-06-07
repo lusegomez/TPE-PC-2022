@@ -15,7 +15,7 @@ int create_passive_socket(int * s, struct socks5args args){
     }
     addr.sin_port = htons(args.socks_port);
     *s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(s < 0) {
+    if(*s < 0) {
         //TODO: Manejar error
         return -1;
     }

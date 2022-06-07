@@ -3,7 +3,6 @@
 
 #include "../../includes/buffer.h"
 #include "../../includes/selector.h"
-#include "../../includes/parser.h"
 
 
 struct hello_st {
@@ -21,7 +20,8 @@ struct hello_st {
     
 };
 
-void hello_read_init(const unsigned state, struct selector_key *key);   //TODO: creo que tienen que retornar void *
+void hello_init(const unsigned state, struct selector_key *key);   //TODO: creo que tienen que retornar void *
 unsigned hello_read(struct selector_key * key);
+unsigned hello_write(struct selector_key * key);
 
 #endif
