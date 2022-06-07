@@ -77,11 +77,12 @@ const struct state_definition states_definition[] = {
             .on_read_ready = copy_read,
             .on_write_ready = copy_write,
         },
+         */
         {
             .state = CLOSE_CONNECTION,
-            .on_arrival = close_connection_init,
+//            .on_arrival = close_connection_init,
         },
-    */
+
         {
                 .state = ERROR,
 //        .on_arrival = error_init,
@@ -116,6 +117,8 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->stm.initial = HELLO;
     sock->stm.max_state = ERROR;
     sock->stm.states = states_definition;
+    sock->hello = malloc(sizeof(struct hello_st));
+    memset(sock->hello, 0x00, sizeof(struct hello_st));
     stm_init(&sock->stm);
 
 
@@ -262,6 +265,7 @@ void socksv5_passive_accept(struct selector_key * key) {
     if(selector_register(key->s, client_sock, &socks5_active_handler, OP_READ, state) != SELECTOR_SUCCESS) {
         goto fail;
     }
+
     return;
 fail:
     if(client_sock != -1) {

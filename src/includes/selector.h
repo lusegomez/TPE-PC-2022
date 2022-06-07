@@ -1,9 +1,9 @@
 #ifndef SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 #define SELECTOR_H_W50GNLODsARolpHbsDsrvYvMsbT
 
-#include <time.h>
+#include <sys/time.h>
 #include <stdbool.h>
-#include <stddef.h>
+
 /**
  * selector.c - un muliplexor de entrada salida
  *
@@ -124,15 +124,15 @@ struct selector_key {
  * Manejador de los diferentes eventos..
  */
 typedef struct fd_handler {
-  void (*handle_read)      (struct selector_key *key);
-  void (*handle_write)     (struct selector_key *key);
-  void (*handle_block)     (struct selector_key *key);
+    void (*handle_read)      (struct selector_key *key);
+    void (*handle_write)     (struct selector_key *key);
+    void (*handle_block)     (struct selector_key *key);
 
-  /**
-   * llamado cuando se se desregistra el fd
-   * Seguramente deba liberar los recusos alocados en data.
-   */
-  void (*handle_close)     (struct selector_key *key);
+    /**
+     * llamado cuando se se desregistra el fd
+     * Seguramente deba liberar los recusos alocados en data.
+     */
+    void (*handle_close)     (struct selector_key *key);
 
 } fd_handler;
 
@@ -188,6 +188,6 @@ selector_fd_set_nio(const int fd);
 /** notifica que un trabajo bloqueante terminó */
 selector_status
 selector_notify_block(fd_selector s,
-                 const int   fd);
+                      const int   fd);
 
 #endif

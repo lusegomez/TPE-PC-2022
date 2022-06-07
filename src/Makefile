@@ -6,12 +6,11 @@ clean:
 	- rm -f *.o  main
 
 COMMON = buffer.o
-SERVER_SOURCES = main.o socks5.o passive_sockets.o selector.o stm.o parser.o parser_utils.o
+SERVER_SOURCES = main.o socks5.o selector.o stm.o parser.o parser_utils.o
 STATES = state_machines/hello_st.o
 
 buffer.o: includes/buffer.h
 socks5.o: includes/socks5.h
-passive_sockets.o: includes/passive_sockets.h
 selector.o: includes/selector.h
 stm.o: includes/stm.h
 parser.o: includes/parser.h

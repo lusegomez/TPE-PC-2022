@@ -15,7 +15,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/signal.h>
-#include "./includes/selector.h"
+#include "includes/selector.h"
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -67,7 +67,7 @@ selector_init(const struct selector_init  *c) {
     //  March 24, 2006
     selector_status   ret = SELECTOR_SUCCESS;
     struct sigaction act = {
-        .sa_handler = wake_handler,
+            .sa_handler = wake_handler,
     };
 
     // 0. calculamos mascara para evitar que se interrumpa antes de llegar al
@@ -89,7 +89,7 @@ selector_init(const struct selector_init  *c) {
     }
     sigemptyset(&emptyset);
 
-finally:
+    finally:
     return ret;
 }
 
@@ -102,10 +102,10 @@ selector_close(void) {
 
 // estructuras internas
 struct item {
-   int                 fd;
-   fd_interest         interest;
-   const fd_handler   *handler;
-   void *              data;
+    int                 fd;
+    fd_interest         interest;
+    const fd_handler   *handler;
+    void *              data;
 };
 
 /* tarea bloqueante */
@@ -331,10 +331,10 @@ selector_destroy(fd_selector s) {
 
 selector_status
 selector_register(fd_selector        s,
-                     const int          fd,
-                     const fd_handler  *handler,
-                     const fd_interest  interest,
-                     void *data) {
+                  const int          fd,
+                  const fd_handler  *handler,
+                  const fd_interest  interest,
+                  void *data) {
     selector_status ret = SELECTOR_SUCCESS;
     // 0. validación de argumentos
     if(s == NULL || INVALID_FD(fd) || handler == NULL) {
@@ -368,7 +368,7 @@ selector_register(fd_selector        s,
         items_update_fdset_for_fd(s, item);
     }
 
-finally:
+    finally:
     return ret;
 }
 
@@ -390,9 +390,9 @@ selector_unregister_fd(fd_selector       s,
 
     if(item->handler->handle_close != NULL) {
         struct selector_key key = {
-            .s    = s,
-            .fd   = item->fd,
-            .data = item->data,
+                .s    = s,
+                .fd   = item->fd,
+                .data = item->data,
         };
         item->handler->handle_close(&key);
     }
@@ -404,7 +404,7 @@ selector_unregister_fd(fd_selector       s,
     item_init(item);
     s->max_fd = items_max_fd(s);
 
-finally:
+    finally:
     return ret;
 }
 
@@ -423,7 +423,7 @@ selector_set_interest(fd_selector s, int fd, fd_interest i) {
     }
     item->interest = i;
     items_update_fdset_for_fd(s, item);
-finally:
+    finally:
     return ret;
 }
 
@@ -448,7 +448,7 @@ static void
 handle_iteration(fd_selector s) {
     int n = s->max_fd;
     struct selector_key key = {
-        .s = s,
+            .s = s,
     };
 
     for (int i = 0; i <= n; i++) {
@@ -479,35 +479,32 @@ handle_iteration(fd_selector s) {
 }
 
 static void
-handle_block_notifications(fd_selector s)
-{
+handle_block_notifications(fd_selector s) {
     struct selector_key key = {
             .s = s,
     };
     pthread_mutex_lock(&s->resolution_mutex);
-    for (struct blocking_job *j = s->resolution_jobs;
-         j != NULL;)
-    {
+    for(struct blocking_job *j = s->resolution_jobs;
+        j != NULL ;
+        j  = j->next) {
+
         struct item *item = s->fds + j->fd;
-        if (ITEM_USED(item))
-        {
-            key.fd = item->fd;
+        if(ITEM_USED(item)) {
+            key.fd   = item->fd;
             key.data = item->data;
             item->handler->handle_block(&key);
         }
-        struct blocking_job * prev_job = j;
-        j=j->next;
-        free(prev_job);
+
+        free(j);
     }
     s->resolution_jobs = 0;
     pthread_mutex_unlock(&s->resolution_mutex);
-
 }
 
 
 selector_status
 selector_notify_block(fd_selector  s,
-                 const int    fd) {
+                      const int    fd) {
     selector_status ret = SELECTOR_SUCCESS;
 
     // TODO(juan): usar un pool
@@ -528,7 +525,7 @@ selector_notify_block(fd_selector  s,
     // notificamos al hilo principal
     pthread_kill(s->selector_thread, conf.signal);
 
-finally:
+    finally:
     return ret;
 }
 
@@ -573,7 +570,7 @@ selector_select(fd_selector s) {
     if(ret == SELECTOR_SUCCESS) {
         handle_block_notifications(s);
     }
-finally:
+    finally:
     return ret;
 }
 
