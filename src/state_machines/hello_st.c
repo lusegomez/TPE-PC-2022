@@ -14,7 +14,9 @@
 
 struct hello_st * init_parser_definition(struct hello_st * st){
     st->ver_def = malloc(sizeof(struct parser_definition));
-    struct parser_definition pd = parser_utils_strcmpi("0X05");
+    char str[2] = "\0"; /* gives {\0, \0} */
+    str[0] = 5;
+    struct parser_definition pd = parser_utils_strcmpi(str);
     memcpy(st->ver_def, &pd, sizeof(struct parser_definition));
     return st;
 }
