@@ -5,7 +5,7 @@
 #include "selector.h"
 #include <stdint.h>
 #include "buffer.h"
-//#include "../state_machines/includes/hello_stm.h"
+#include "../state_machines/includes/hello_st.h"
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
@@ -28,7 +28,7 @@ struct socks5 {
 
     //struct users current_users;
 
-//    struct hello_st hello;
+    struct hello_st hello;
 //    struct request_st request;
 //    struct copy copy;
 //

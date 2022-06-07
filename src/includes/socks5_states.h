@@ -5,8 +5,8 @@
 #include "stm.h"
 
 enum socks5_state {
-    HELLO_READING,
-    HELLO_WRITING,
+    HELLO,
+    //HELLO_WRITING,
     HELLO_AUTH_WRITING,
     HELLO_AUTH_READING,
     REQUEST_READING,
@@ -22,12 +22,13 @@ enum socks5_state {
 };
 
 const struct state_definition states_definition[] = {
-    /*{
-        .state = HELLO_READING,
+    {
+        .state = HELLO,
         .on_arrival = hello_read_init,
-        .on_read_ready = hello_read
+        .on_read_ready = hello_read,
+        .on_write_ready = hello_write
     },
-    */
+    
     /*
     {
         .state = HELLO_WRITING,
@@ -79,11 +80,11 @@ const struct state_definition states_definition[] = {
         .state = CLOSE_CONNECTION,
         .on_arrival = close_connection_init,
     },
+*/
     {
         .state = ERROR,
         .on_arrival = error_init,
     },
-    */
 };
 
 #endif

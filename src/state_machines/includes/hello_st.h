@@ -6,13 +6,15 @@
 #include "../../includes/parser.h"
 
 
-struct hello_stm {
-    struct parser * parser;
+struct hello_st {
+    struct parser * ver_parser;
+    struct parser_definition * ver_def;
+    struct parser_definition * method_def[3];
    // struct hello_parser parser;
-    buffer read_buffer;
-    buffer write_buffer;
-    uint8_t * read_buffer_data;
-    uint8_t * write_buffer_data;
+  //  buffer read_buffer;
+  //  buffer write_buffer;
+  //  uint8_t * read_buffer_data;
+  //  uint8_t * write_buffer_data;
 
 
     int selected_method;

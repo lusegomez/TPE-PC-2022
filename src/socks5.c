@@ -1,4 +1,6 @@
+#include <netdb.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +11,6 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <sys/queue.h>
-#include <netdb.h>
 
 #include <arpa/inet.h>
 #include "./includes/socks5.h"
@@ -43,6 +44,7 @@ static struct socks5 * create_new_sock5(int client_fd) {
 
     sock->client_fd = client_fd;
     sock->origin_fd = -1;
+
 
     sock->stm.initial = HELLO_READING;
     sock->stm.max_state = ERROR;
@@ -208,7 +210,7 @@ void socks5_handle_read(struct selector_key * key) {
     struct state_machine *stm = &ATTACHMENT(key)->stm;
     enum socks5_state state = stm_handler_read(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5(key);
+        destroy_socks5((struct socks5 *) key);
     }
 
 }
@@ -217,7 +219,7 @@ void socks5_handle_write(struct selector_key * key){
 
     enum socks5_state state = stm_handler_write(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5(key);
+        destroy_socks5((struct socks5 *)key);
 
     }
 
@@ -227,7 +229,7 @@ void socks5_handle_block(struct selector_key * key) {
 
     enum socks5_state state = stm_handler_block(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5(key);
+        destroy_socks5((struct socks5 *)key);
     }
 
 }
