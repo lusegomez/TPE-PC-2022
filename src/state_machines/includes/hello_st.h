@@ -3,19 +3,11 @@
 
 #include "../../includes/buffer.h"
 #include "../../includes/selector.h"
+#include "../../parsers/includes/hello_parser.h"
 
 
 struct hello_st {
-    struct parser * ver_parser;
-    struct parser_definition * ver_def;
-    struct parser_definition * method_def[3];
-   // struct hello_parser parser;
-  //  buffer read_buffer;
-  //  buffer write_buffer;
-  //  uint8_t * read_buffer_data;
-  //  uint8_t * write_buffer_data;
-
-
+    struct hello_parser * hello_parser;
     int selected_method;
     
 };

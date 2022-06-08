@@ -2,6 +2,8 @@
 #define HELLO_PARSER_H
 
 #include <stdlib.h>
+#include <stdio.h>
+#include "../../includes/buffer.h"
 
 #define PROXY_SOCKS5_V5     0x05
 
@@ -21,8 +23,7 @@ struct hello_parser {
     uint8_t index;
 };
 
-enum hello_state consume_buffer(buffer * b, struct hello_parser * parser);
-
+enum hello_state consume_hello(buffer * b, struct hello_parser * hp);
 
 
 #endif
