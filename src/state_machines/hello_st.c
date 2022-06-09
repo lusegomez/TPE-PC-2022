@@ -79,14 +79,19 @@ unsigned hello_read(struct selector_key * key) {
             }
             hello_response(&sock->write_buffer, sock->hello);
         } else if(state == hello_error){
+            hello_response(&sock->write_buffer, sock->hello);
+
             sock->hello->selected_method = NOMETHOD;
+            if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                goto finally;
+            }
         }
     }
     return HELLO;
     finally:
     sock->hello->selected_method = NOMETHOD;
     hello_response(&sock->write_buffer, sock->hello);
-
+    return ERROR;
 //    for(int i = 0; i < ret; i++) {
 //        const struct parser_event * state = parser_feed(sock->hello->ver_parser, pointer[i]);
 //        if(state->type == STRING_CMP_EQ) {
@@ -119,8 +124,25 @@ unsigned hello_write(struct selector_key * key) {
     uint8_t ret_state = HELLO;
     ssize_t ret = send(key->fd, pointer, n, MSG_NOSIGNAL);
     if(ret > 0) {
-
+        buffer_read_adv(&sock->write_buffer, n);
+        if(!buffer_can_read(&sock->write_buffer)){
+            if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){
+                goto finally;
+            }
+            if(sock->hello->selected_method == AUTH) {
+                return HELLO_AUTH;
+            }
+            if(sock->hello->selected_method == NOAUTH) {
+                return REQUEST_READING;
+            }
+            if(sock -> hello->selected_method == NOMETHOD){
+                goto finally;
+            }
+        }
+    }else {
+        goto finally;
     }
-    
     return ret_state;
+finally:
+    return ERROR;
 }

@@ -29,6 +29,12 @@ const struct state_definition states_definition[] = {
                 .on_read_ready = hello_read,
                 .on_write_ready = hello_write
         },
+        {
+            .state = HELLO_AUTH,
+            .on_arrival = hello_auth_init,
+            .on_read_ready = hello_auth_read,
+            .on_write_ready = hello_auth_write
+        },
 
         /*
         {
@@ -36,11 +42,7 @@ const struct state_definition states_definition[] = {
             .on_arrival = hello_write_init,
             .on_write_ready = hello_write
         },
-        {
-            .state = HELLO_AUTH_READING,
-            .on_arrival = hello_auth_read_init,
-            .on_read_ready = hello__auth_read
-        },
+        
         {
             .state = HELLO_AUTH_WRITING,
             .on_arrival = hello_auth_write_init,
