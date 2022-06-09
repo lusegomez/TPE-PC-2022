@@ -43,6 +43,7 @@ void hello_init(const unsigned state, struct selector_key *key) {
     struct hello_st * st = ATTACHMENT(key)->hello;
     st->selected_method = -1;
     st->hello_parser = malloc(sizeof(struct hello_parser));
+    hello_parser_init(st->hello_parser);
     //TODO: Init parser
 //    st = init_parser_definition(st);
 //    st->ver_parser = parser_init(parser_no_classes(),st->ver_def);
@@ -133,7 +134,7 @@ unsigned hello_write(struct selector_key * key) {
                 return HELLO_AUTH;
             }
             if(sock->hello->selected_method == NOAUTH) {
-                return REQUEST_READING;
+//                return REQUEST_READING;
             }
             if(sock -> hello->selected_method == NOMETHOD){
                 goto finally;

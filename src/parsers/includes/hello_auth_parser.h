@@ -24,7 +24,7 @@ struct hello_auth_parser {
     uint8_t plen;
 
 };
-
+void hello_auth_parser_init(struct hello_auth_parser * hap);
 enum hello_auth_state consume_hello_auth(buffer * b, struct hello_auth_parser * hap);
 
 #endif

@@ -120,7 +120,9 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->stm.max_state = ERROR;
     sock->stm.states = states_definition;
     sock->hello = malloc(sizeof(struct hello_st));
+    sock->hello_auth = malloc(sizeof(struct hello_auth_st));
     memset(sock->hello, 0x00, sizeof(struct hello_st));
+    memset(sock->hello_auth, 0x00, sizeof(struct hello_auth_st));
     stm_init(&sock->stm);
 
 

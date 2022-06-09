@@ -10,7 +10,7 @@ enum socks5_state {
     HELLO,
     //HELLO_AUTH_WRITING,
     HELLO_AUTH,
-    REQUEST_READING,
+  //  REQUEST_READING,
  //   DNS_QUERY,
  //   DNS_RESPONSE,
 //    CONNECT_ORIGIN,

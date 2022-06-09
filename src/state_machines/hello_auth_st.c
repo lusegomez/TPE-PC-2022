@@ -18,6 +18,7 @@
 void hello_auth_init(const unsigned state, struct selector_key *key){
     struct hello_auth_st * st = ATTACHMENT(key)->hello_auth;
     st->hello_auth_parser = malloc(sizeof(struct hello_auth_parser));
+    hello_auth_parser_init(st->hello_auth_parser);
 
 }
 
@@ -71,7 +72,7 @@ unsigned hello_auth_write(struct selector_key * key) {
                 if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){
                     goto finally;
                 }
-                return REQUEST_READING;
+//                return REQUEST_READING;
             } else {
                     //TODO: cerrar conexion 
                     goto finally;

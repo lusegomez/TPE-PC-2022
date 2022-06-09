@@ -23,6 +23,7 @@ struct hello_parser {
     uint8_t index;
 };
 
+void hello_parser_init(struct hello_parser *hp);
 enum hello_state consume_hello(buffer * b, struct hello_parser * hp);
 
 
