@@ -16,6 +16,7 @@ enum request_read_state consume_request_byte(uint8_t c, struct request_read_pars
     switch(rp->state) {
         case request_reading_version:
             if(c == PROXY_SOCKS5_V5){
+                rp->version = c;
                 rp->state = request_reading_command;
             } else {
                 rp->state = request_reading_error;
@@ -38,6 +39,7 @@ enum request_read_state consume_request_byte(uint8_t c, struct request_read_pars
             break;
         case request_reading_atype:
             if(c == 3){
+                rp->atype = c;
                 rp->state = request_reading_destaddr_len;
             } else if(c == 1 || c == 4) {
                 rp->atype = c;
