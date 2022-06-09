@@ -5,12 +5,14 @@ all: main
 clean:
 	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d
 
-COMMON = buffer.o
+COMMON = buffer.o args.o passive_sockets.o
 SERVER_SOURCES = main.o socks5.o selector.o stm.o parser.o parser_utils.o
 PARSERS = parsers/hello_parser.o parsers/hello_auth_parser.o parsers/request_read_parser.o
 STATES = state_machines/hello_st.o state_machines/hello_auth_st.o state_machines/request_read_st.o
 
 buffer.o: includes/buffer.h
+passive_sockets.o: includes/passive_sockets.h
+args.o: includes/args.h
 socks5.o: includes/socks5.h
 selector.o: includes/selector.h
 stm.o: includes/stm.h

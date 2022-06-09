@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <getopt.h>
 
-#include "args.h"
+#include "./includes/args.h"
 
 static unsigned short
 port(const char *s) {
@@ -73,7 +73,9 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
     memset(args, 0, sizeof(*args)); // sobre todo para setear en null los punteros de users
 
     args->socks_addr = "0.0.0.0";
+    args->socks_addr6 = "::";
     args->socks_port = 1080;
+
 
     args->mng_addr   = "127.0.0.1";
     args->mng_port   = 8080;

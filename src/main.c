@@ -24,6 +24,8 @@
 #include <netinet/tcp.h>
 #include "./includes/selector.h"
 #include "./includes/socks5.h"
+#include "./includes/passive_sockets.h"
+#include "./includes/args.h"
 
 /*
 #include "socks5nio.h"
@@ -37,8 +39,10 @@ sigterm_handler(const int signal) {
 }
 
 int
-main(const int argc, const char **argv) {
+main(const int argc, char **argv) {
     unsigned port = 1080;
+    struct socks5args args;
+    parse_args(argc, argv, &args);
 
     if(argc == 1) {
         // utilizamos el default
@@ -65,19 +69,36 @@ main(const int argc, const char **argv) {
     selector_status   ss      = SELECTOR_SUCCESS;
     fd_selector selector      = NULL;
 
+
+    //TODO:Set ipv4/ipv6
+    int passive_socket_ipv4 = -1;
+    int passive_socket_ipv6 = -1;
+
+    int errorIPv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
+    if(errorIPv4 == -1) {
+        printf("Error al crear socket IPv4 \n");
+    }
+    int errorIPv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
+    if(errorIPv6 == -1) {
+        printf("Error al crear socket IPv6 \n");
+    }
+    if (errorIPv4 == -1 && errorIPv6 == -1)
+    {
+        goto finally;
+    }
+    fprintf(stdout, "Listening on TCP port %d\n", port);
+/*    
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family      = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port        = htons(port);
-
     const int server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(server < 0) {
         err_msg = "unable to create socket";
         goto finally;
     }
 
-    fprintf(stdout, "Listening on TCP port %d\n", port);
 
     // man 7 ip. no importa reportar nada si falla.
     setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
@@ -101,6 +122,10 @@ main(const int argc, const char **argv) {
         err_msg = "getting server socket flags";
         goto finally;
     }
+*/
+    signal(SIGTERM, sigterm_handler);
+    signal(SIGINT,  sigterm_handler);
+
     const struct selector_init conf = {
         .signal = SIGALRM,
         .select_timeout = {
@@ -123,12 +148,33 @@ main(const int argc, const char **argv) {
         .handle_write      = NULL,
         .handle_close      = NULL, // nada que liberar
     };
+
+    bool ipv4_flag = false;
+    bool ipv6_flag = false;
+    if(passive_socket_ipv4 != -1){
+        ss = selector_register(selector, passive_socket_ipv4, &socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv4_flag = true;
+            err_msg = "Error registering IPv4 Socket";
+        }
+    }
+    if(passive_socket_ipv6 != -1){
+        ss = selector_register(selector, passive_socket_ipv6, &socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv6_flag = true;
+            err_msg = "Error registering IPv6 Socket";
+        }
+    }
+
+    if(ipv4_flag && ipv6_flag) goto finally;
+    /*
     ss = selector_register(selector, server, &socksv5,
                                               OP_READ, NULL);
     if(ss != SELECTOR_SUCCESS) {
         err_msg = "registering fd";
         goto finally;
     }
+    */
     for(;!done;) {
         err_msg = NULL;
         ss = selector_select(selector);
@@ -158,11 +204,18 @@ finally:
     }
     selector_close();
 
-    close(server);
+    if (passive_socket_ipv4 != -1) {
+        close(passive_socket_ipv4);
+    }
+    if (passive_socket_ipv6 != -1) {
+        close(passive_socket_ipv6);
+    }
+    
     //socksv5_pool_destroy();
-
+/*
+    close(server);
     if(server >= 0) {
         close(server);
-    }
+    }*/
     return ret;
 }

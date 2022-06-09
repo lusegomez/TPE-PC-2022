@@ -20,6 +20,8 @@ struct doh {
 
 struct socks5args {
     char           *socks_addr;
+    char           *socks_addr6;
+
     unsigned short  socks_port;
 
     char *          mng_addr;
