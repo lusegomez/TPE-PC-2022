@@ -3,7 +3,7 @@ CFLAGS = --std=c11 -pedantic -pedantic-errors -g -Wall -Wextra -Wno-unused-param
 LDFLAGS = -lpthread -pthread
 all: main
 clean:
-	- rm -f *.o ./state_machines/*.o ./parsers/*.o main
+	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d
 
 COMMON = buffer.o
 SERVER_SOURCES = main.o socks5.o selector.o stm.o parser.o parser_utils.o
@@ -23,4 +23,4 @@ parsers/hello_auth_parser.o: parsers/includes/hello_auth_parser.h
 
 
 main: $(SERVER_SOURCES) $(STATES) $(PARSERS) $(COMMON)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o main $(SERVER_SOURCES) $(STATES) $(PARSERS) $(COMMON)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o socks5d $(SERVER_SOURCES) $(STATES) $(PARSERS) $(COMMON)
