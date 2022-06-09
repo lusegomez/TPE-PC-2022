@@ -9,11 +9,14 @@
 #include "./includes/hello_auth_st.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
+#include "../utils/includes/users.h"
 
 #define AUTH_VERSION 0x01
 #define AUTH_RESPONSE 2
 #define STATUS_SUCCESS 0x00 
+#define STATUS_FAILURE 0x01 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+
 
 void hello_auth_init(const unsigned state, struct selector_key *key){
     struct hello_auth_st * st = ATTACHMENT(key)->hello_auth;
@@ -41,6 +44,9 @@ unsigned hello_auth_read(struct selector_key * key){
         buffer_write_adv(&sock->read_buffer, ret);
         enum hello_auth_state state = consume_hello_auth(&sock->read_buffer, hap); 
         if(state == hello_auth_end){
+            if(!can_login(hap->user, hap->pass)) {
+                sock->hello_auth->status = STATUS_FAILURE;
+            }
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
                 goto finally;
             }   
@@ -88,3 +94,5 @@ finally:
     return ERROR;
 
 }
+
+
