@@ -24,10 +24,10 @@ static struct socks5 *pool = NULL;
 
 const struct state_definition states_definition[] = {
         {
-                .state = HELLO,
-                .on_arrival = hello_init,
-                .on_read_ready = hello_read,
-                .on_write_ready = hello_write
+            .state = HELLO,
+            .on_arrival = hello_init,
+            .on_read_ready = hello_read,
+            .on_write_ready = hello_write
         },
         {
             .state = HELLO_AUTH,
@@ -35,44 +35,35 @@ const struct state_definition states_definition[] = {
             .on_read_ready = hello_auth_read,
             .on_write_ready = hello_auth_write
         },
-
-        /*
-        {
-            .state = HELLO_WRITING,
-            .on_arrival = hello_write_init,
-            .on_write_ready = hello_write
-        },
-        
-        {
-            .state = HELLO_AUTH_WRITING,
-            .on_arrival = hello_auth_write_init,
-            .on_write_ready = hello_auth_write
-        },
         {
             .state = REQUEST_READING,
-            .on_arrival = request_reading_init,
-            .on_read_ready = request_reading
+            .on_arrival = request_read_init,
+            .on_read_ready = request_read
         },
+
         {
             .state = DNS_QUERY,
-            .on_arrival = dns_query_init,
-            .on_departure = dns_query_close
+//            .on_arrival = dns_query_init,
+//            .on_departure = dns_query_close
         },
+        /*
         {
             .state = DNS_RESPONSE,
             .on_arrival = dns_response_init,
             .on_read_ready = dns_response
         },
+         */
         {
             .state = CONNECT_ORIGIN,
-            .on_arrival = connect_origin_init,
-            .on_block_ready = connect_origin_block
+//            .on_arrival = connect_origin_init,
+//            .on_block_ready = connect_origin_block
         },
         {
-            .state = REQUEST_WRITING,
-            .on_arrival = request_write_init,
-            .on_write_ready = request_write,
+            .state = RESPONSE_WRITING,
+//            .on_arrival = request_write_init,
+//            .on_write_ready = request_write,
         },
+        /*
         {
             .state = COPY,
             .on_arrival = copy_init,
@@ -121,8 +112,10 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->stm.states = states_definition;
     sock->hello = malloc(sizeof(struct hello_st));
     sock->hello_auth = malloc(sizeof(struct hello_auth_st));
+    sock->request_read = malloc(sizeof(struct request_read_st));
     memset(sock->hello, 0x00, sizeof(struct hello_st));
     memset(sock->hello_auth, 0x00, sizeof(struct hello_auth_st));
+    memset(sock->request_read, 0x00, sizeof(struct request_read_st));
     stm_init(&sock->stm);
 
 

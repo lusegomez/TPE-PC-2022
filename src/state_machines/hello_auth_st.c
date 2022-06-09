@@ -72,7 +72,7 @@ unsigned hello_auth_write(struct selector_key * key) {
                 if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){
                     goto finally;
                 }
-//                return REQUEST_READING;
+                return REQUEST_READING;
             } else {
                     //TODO: cerrar conexion 
                     goto finally;
