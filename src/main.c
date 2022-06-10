@@ -26,10 +26,8 @@
 #include "./includes/socks5.h"
 #include "./includes/passive_sockets.h"
 #include "./includes/args.h"
+#include "./utils/includes/users.h"
 
-/*
-#include "socks5nio.h"
-*/
 static bool done = false;
 
 static void
@@ -43,7 +41,9 @@ main(const int argc, char **argv) {
     unsigned port = 1080;
     struct socks5args args;
     parse_args(argc, argv, &args);
-
+    char * name = "Juan";
+    char * pass = "12345";
+   // add_user(name, pass);
     if(argc == 1) {
         // utilizamos el default
     } else if(argc == 2) {
