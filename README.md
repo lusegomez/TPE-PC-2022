@@ -8,10 +8,10 @@
   * [Cliente] (#client)
 4. [Documentación del servidor de monitoreo] (#mng-doc)
 
-##Descripción del proyecto
+## Descripción del proyecto
 El objetivo del trabajo es implementar un servidor proxy para el protocolo SOCKSv5[RFC1928], el cual puede atender multiples clientes en forma concurrente y simultanea.
 
-##Instalación
+## Instalación
 El proyecto se compila utilizando el siguiente comando en el directorio src del proyecto:
 ```bash
 make all
@@ -28,8 +28,8 @@ Si se desea eliminar los binarios se debe ejecutar el siguiente comando en el di
 make clean
 ```
 
-##Instrucciones para el uso
-###Servidor
+## Instrucciones para el uso
+### Servidor
 Para ejecutar el servidor se debe ejecutar el siguiente comando:
 ```bash
 ./socks5d <options>
@@ -39,4 +39,4 @@ Las distintas opciones estan especificadas en su manual (socks5d.8). Para accede
 man ./socks5d.8
 ```
 
-###Cliente
+### Cliente
