@@ -29,6 +29,7 @@ enum hello_auth_state consume_hello_auth_byte(uint8_t c, struct hello_auth_parse
     case hello_auth_reading_uname:
         hap->user[hap->user_index++] = c;
         if(hap->user_index == hap->ulen){
+            hap->user[hap->user_index++] = '\0';
             hap->state = hello_auth_reading_plen;
         } else{
             hap->state = hello_auth_reading_uname;
@@ -45,6 +46,7 @@ enum hello_auth_state consume_hello_auth_byte(uint8_t c, struct hello_auth_parse
     case hello_auth_reading_password:
         hap->pass[hap->pass_index++]  = c;
         if(hap->pass_index == hap->plen){
+            hap->pass[hap->pass_index++] = '\0';
             hap->state = hello_auth_end;
         } else{
             hap->state = hello_auth_reading_password;

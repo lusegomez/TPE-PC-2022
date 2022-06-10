@@ -28,6 +28,7 @@
 #include "./includes/args.h"
 #include "./utils/includes/users.h"
 
+struct socks5args args;
 static bool done = false;
 
 static void
@@ -37,13 +38,12 @@ sigterm_handler(const int signal) {
 }
 
 int
-main(const int argc, char **argv) {
-    unsigned port = 1080;
-    struct socks5args args;
-    parse_args(argc, argv, &args);
-    char * name = "Juan";
-    char * pass = "12345";
-   // add_user(name, pass);
+main(const int argc, const char **argv) {
+    parse_args(argc, (char **)argv, &args);
+    printf("%s", args.users[0].name);
+    printf("%s", args.users[0].pass);
+    add_user(&args.users[0]);
+ /*
     if(argc == 1) {
         // utilizamos el default
     } else if(argc == 2) {
@@ -61,7 +61,7 @@ main(const int argc, char **argv) {
         fprintf(stderr, "Usage: %s <port>\n", argv[0]);
         return 1;
     }
-
+*/
     // no tenemos nada que leer de stdin
     close(0);
 
@@ -86,7 +86,7 @@ main(const int argc, char **argv) {
     {
         goto finally;
     }
-    fprintf(stdout, "Listening on TCP port %d\n", port);
+    fprintf(stdout, "Listening on TCP port %d\n", args.socks_port);
 /*    
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));

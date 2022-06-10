@@ -3,7 +3,7 @@ CFLAGS = --std=c11 -pedantic -pedantic-errors -g -Wall -Wextra -Wno-unused-param
 LDFLAGS = -lpthread -pthread
 all: main
 clean:
-	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d
+	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d ./utils/*.o
 
 COMMON = buffer.o args.o passive_sockets.o utils/users.o
 SERVER_SOURCES = main.o socks5.o selector.o stm.o parser.o parser_utils.o

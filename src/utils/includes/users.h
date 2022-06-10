@@ -7,6 +7,7 @@
 #include "../../includes/args.h"
 
 
+int add_user(struct users * usr);
 //int add_user(char * user, char * pass);
 
 bool can_login(uint8_t * user, uint8_t * pass);
