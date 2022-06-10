@@ -1,12 +1,12 @@
-# PROXY-SOCKS5 PROTOCOLOS DE COMUNICACION 2022-1C
+# PROXY-SOCKS5 - PROTOCOLOS DE COMUNICACION - 2022-1C
 
-##Table de contenidos
-1. [Descripción del proyecto] (#descripcion)
-2. [Instalación] (#instalacion)
-3. [Instrucciones para el uso] (#instrucciones)
-  * [Servidor] (#server)
-  * [Cliente] (#client)
-4. [Documentación del servidor de monitoreo] (#mng-doc)
+## Tabla de contenidos
+1. [**Descripción del proyecto**] (#descripcion)
+2. [**Instalación**] (#instalacion)
+3. [**Instrucciones para el uso**] (#instrucciones)
+  * [**Servidor**] (#server)
+  * [**Cliente**] (#client)
+4. [**Documentación del servidor de monitoreo**] (#mng-doc)
 
 ## Descripción del proyecto
 El objetivo del trabajo es implementar un servidor proxy para el protocolo SOCKSv5[RFC1928], el cual puede atender multiples clientes en forma concurrente y simultanea.
