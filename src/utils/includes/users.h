@@ -3,16 +3,13 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "../../includes/args.h"
 
 
-static int total_users = 0;
-static int total_admins = 0;
-
-static struct users * users;
-static struct users * users_admins;
-
+//int add_user(char * user, char * pass);
 
 bool can_login(uint8_t * user, uint8_t * pass);
+bool is_admin(uint8_t * user, uint8_t * pass);
 
 #endif
