@@ -5,7 +5,7 @@
 #include <netdb.h>
 #include <string.h>
 #include "src/utils/includes/logger.h"
-#include "util.h"
+#include "src/utils/includes/util.h"
 
 #define MAXPENDING 5 // Maximum outstanding connection requests
 #define BUFSIZE 256

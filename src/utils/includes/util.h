@@ -16,5 +16,7 @@ char * printAddressPort( const struct addrinfo *aip, char addr[]);
 
 // Determina si dos sockets son iguales (misma direccion y puerto)
 int sockAddrsEqual(const struct sockaddr *addr1, const struct sockaddr *addr2);
-
+extern const char *
+sockaddr_to_human(char *buff, const size_t buffsize,
+                  const struct sockaddr *addr);
 #endif 
