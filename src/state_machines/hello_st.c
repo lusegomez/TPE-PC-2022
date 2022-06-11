@@ -145,7 +145,7 @@ unsigned hello_write(struct selector_key * key) {
                 return HELLO_AUTH;
             }
             if(sock->hello->selected_method == NOAUTH) {
-//                return REQUEST_READING;
+                return REQUEST_READING;
             }
             if(sock -> hello->selected_method == NOMETHOD){
                 goto finally;

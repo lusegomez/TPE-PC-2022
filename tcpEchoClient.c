@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "logger.h"
+#include "src/utils/includes/logger.h"
 #include "tcpClientUtil.h"
 
 #define BUFSIZE 512

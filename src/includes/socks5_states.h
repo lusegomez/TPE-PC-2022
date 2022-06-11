@@ -11,7 +11,6 @@ enum socks5_state {
     HELLO_AUTH,
     REQUEST_READING,
     DNS_QUERY,
- //   DNS_RESPONSE,
     CONNECT_ORIGIN,
     RESPONSE_WRITING,
 //    COPY,

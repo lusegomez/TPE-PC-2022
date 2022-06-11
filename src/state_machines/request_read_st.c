@@ -30,7 +30,9 @@ void request_read_init(const unsigned state, struct selector_key * key){
 }
 
 void request_read_reset(struct request_read_st * rq){
-    free(rq->req_parser);
+    if(rq->req_parser != NULL){
+        free(rq->req_parser);
+    }
 }
 
 void request_response(buffer * b, struct request_read_st * req);

@@ -27,7 +27,9 @@ void hello_auth_init(const unsigned state, struct selector_key *key){
 
 void hello_auth_reset(struct hello_auth_st * ha){
     ha->status = -1;
-    free(ha->hello_auth_parser);
+    if(ha->hello_auth_parser != NULL){
+        free(ha->hello_auth_parser);
+    }
 }
 
 void hello_auth_response(buffer * b, struct hello_auth_st * hello_auth){

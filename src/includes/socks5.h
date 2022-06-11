@@ -8,6 +8,7 @@
 #include "../state_machines/includes/hello_st.h"
 #include "../state_machines/includes/hello_auth_st.h"
 #include "../state_machines/includes/request_read_st.h"
+#include "../state_machines/includes/dns_query_st.h"
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
@@ -34,6 +35,7 @@ struct socks5 {
     struct hello_st * hello;
     struct hello_auth_st * hello_auth;
     struct request_read_st * request_read;
+    struct dns_query_st * dns_query;
 //    struct request_st request;
 //    struct copy copy;
 //
