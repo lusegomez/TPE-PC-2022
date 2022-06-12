@@ -5,10 +5,13 @@
 static int total_users = 0;
 static int total_admins = 0;
 
-static struct users * users;
-static struct users * users_admins;
+static struct users * users = NULL;
+static struct users * users_admins = NULL;
 
 int add_user(struct users * usr){
+    if(usr->name == 0 || usr->pass == 0){
+        return -1;
+    }
     if(users == NULL){
         users = calloc(MAX_USERS, sizeof(struct users));
         if (users == NULL) {

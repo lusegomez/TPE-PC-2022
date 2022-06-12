@@ -8,7 +8,7 @@
 #include "../state_machines/includes/hello_st.h"
 #include "../state_machines/includes/hello_auth_st.h"
 #include "../state_machines/includes/request_read_st.h"
-#include "../state_machines/includes/connect_st.h"
+#include "../utils/includes/connect.h"
 #include "../state_machines/includes/dns_query_st.h"
 
 
@@ -36,7 +36,7 @@ struct socks5 {
     struct hello_st * hello;
     struct hello_auth_st * hello_auth;
     struct request_read_st * request_read;
-    struct connect_st * connect_origin; 
+    struct connect * connect_origin; 
     struct dns_query_st * dns_query;
     //    struct request_st request;
     //    struct copy copy;

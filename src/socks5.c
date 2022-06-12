@@ -48,8 +48,6 @@ const struct state_definition states_definition[] = {
         },
         {
             .state = CONNECT_ORIGIN,
-            .on_arrival = connect_init,
-            .on_write_ready = connect_write,
 //            .on_block_ready = connect_origin_block
         },
         {

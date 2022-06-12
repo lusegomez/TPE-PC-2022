@@ -12,6 +12,7 @@
 #include "./includes/dns_query_st.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
+#include "../utils/includes/connect.h"
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
@@ -65,6 +66,6 @@ void dns_query_init(const unsigned state, struct selector_key *key){
 
 unsigned dns_query_close(struct selector_key * key){
     struct socks5 * sock = ATTACHMENT(key);
-    return sock->origin_resolution == NULL ? ERROR : CONNECT_ORIGIN;
+    return sock->origin_resolution == NULL ? ERROR : connect_init(key);
 }
 

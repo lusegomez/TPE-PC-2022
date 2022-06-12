@@ -1,7 +1,6 @@
-#ifndef CONNECT_ST_H
-#define CONNECT_ST_H
+#ifndef CONNECT_H
+#define CONNECT_H
 
-#include "../../includes/buffer.h"
 #include "../../includes/selector.h"
 
 //BND.PORT contanins the port number that the server assigned to connect to the target host
@@ -13,7 +12,7 @@ enum connection_type {
     FQDN
 };
 */
-struct connect_st {
+struct connect {
     uint8_t atype;
     uint8_t destaddr_len;
     uint8_t * destaddr;
@@ -23,7 +22,6 @@ struct connect_st {
     struct sockaddr_in6 * origin_addr6;
 };
 
-unsigned connect_init(const unsigned state, struct selector_key *key);
-unsigned connect_write(struct selector_key * key);
+unsigned connect_init(struct selector_key *key);
 
 #endif
