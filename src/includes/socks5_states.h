@@ -12,7 +12,7 @@ enum socks5_state {
     REQUEST_READING,
     DNS_QUERY,
     RESPONSE_WRITING,
-//    COPY,
+    COPY,
     CLOSE_CONNECTION,
     ERROR
 

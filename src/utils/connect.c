@@ -3,13 +3,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+
 #include <errno.h>
 
 #include "./includes/connect.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
+#include "../utils/includes/response.h"
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 #define IPV4 0x01
@@ -18,6 +18,7 @@
 
 unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     struct socks5 * sock = ATTACHMENT(key);
+    unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
     //Crear socket para origin
     sock->origin_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(sock->origin_fd < 0) {
@@ -36,19 +37,33 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     conn->origin_addr.sin_family = AF_INET;
     
     if(connect(sock->origin_fd, (const struct sockaddr *)&conn->origin_addr, sizeof(conn->origin_addr)) < 0){
-        if(errno == EINPROGRESS){   //La conexion es bloqueante y no se resuelve inmediatamente
-            if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
-                goto finally;
-            }
-            return RESPONSE_WRITING;
-        } else {
-            goto finally;
+        switch (errno) {
+            case EINPROGRESS:
+                if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
+                    state = GENERAL_SOCKS_SERVER_FAILURE;
+                    goto finally;
+                }
+                request_response(sock, SUCCEDED);
+                return RESPONSE_WRITING;
+            case ECONNREFUSED:
+                state = CONNECTION_REFUSED;
+                break;
+            case EHOSTUNREACH:
+                state = HOST_UNREACHABLE;
+                break;
+            case ENETUNREACH:
+                state = NETWORK_UNREACHABLE;
+                break;
+            default:
+                state = GENERAL_SOCKS_SERVER_FAILURE;
+                break;
         }
-    }
+        goto finally;
 
+    }
     return RESPONSE_WRITING;
 finally:
-    //Tengo que informar del error
+    request_response(sock, state);
     return RESPONSE_WRITING;
 
 }

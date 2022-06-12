@@ -2,6 +2,8 @@
 #define CONNECT_H
 
 #include "../../includes/selector.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 //BND.PORT contanins the port number that the server assigned to connect to the target host
 //BND.ADDR contains the associated IP address

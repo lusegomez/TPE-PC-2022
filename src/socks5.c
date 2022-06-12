@@ -48,17 +48,16 @@ const struct state_definition states_definition[] = {
         },
         {
             .state = RESPONSE_WRITING,
-//            .on_arrival = request_write_init,
-//            .on_write_ready = request_write,
+            .on_write_ready = request_write,
         },
-        /*
+
         {
             .state = COPY,
-            .on_arrival = copy_init,
-            .on_read_ready = copy_read,
-            .on_write_ready = copy_write,
+//            .on_arrival = copy_init,
+//            .on_read_ready = copy_read,
+//            .on_write_ready = copy_write,
         },
-         */
+
         {
             .state = CLOSE_CONNECTION,
 //            .on_arrival = close_connection_init,
