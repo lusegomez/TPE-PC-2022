@@ -7,11 +7,9 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-#include "../includes/parser_utils.h"
 #include "./includes/connect.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
-#include "../utils/includes/util.h"
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 #define IPV4 0x01
@@ -38,7 +36,6 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     conn->origin_addr.sin_family = AF_INET;
     
     if(connect(sock->origin_fd, (const struct sockaddr *)&conn->origin_addr, sizeof(conn->origin_addr)) < 0){
-        int err = errno;
         if(errno == EINPROGRESS){   //La conexion es bloqueante y no se resuelve inmediatamente
             if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
                 goto finally;
