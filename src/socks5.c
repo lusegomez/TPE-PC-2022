@@ -16,6 +16,7 @@
 #include "./includes/socks5.h"
 #include "./includes/selector.h"
 #include "./includes/socks5_states.h"
+#include "./includes/parser.h"
 
 
 static unsigned pool_size = 0;
@@ -40,19 +41,11 @@ const struct state_definition states_definition[] = {
             .on_arrival = request_read_init,
             .on_read_ready = request_read
         },
-
         {
             .state = DNS_QUERY,
-//            .on_arrival = dns_query_init,
-//            .on_departure = dns_query_close
+            .on_arrival = dns_query_init,
+            .on_block_ready = dns_query_close
         },
-        /*
-        {
-            .state = DNS_RESPONSE,
-            .on_arrival = dns_response_init,
-            .on_read_ready = dns_response
-        },
-         */
         {
             .state = CONNECT_ORIGIN,
             .on_arrival = connect_init,
@@ -114,9 +107,11 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->hello = malloc(sizeof(struct hello_st));
     sock->hello_auth = malloc(sizeof(struct hello_auth_st));
     sock->request_read = malloc(sizeof(struct request_read_st));
+    sock->dns_query = malloc(sizeof(struct dns_query_st));
     memset(sock->hello, 0x00, sizeof(struct hello_st));
     memset(sock->hello_auth, 0x00, sizeof(struct hello_auth_st));
     memset(sock->request_read, 0x00, sizeof(struct request_read_st));
+    memset(sock->dns_query, 0x00, sizeof(struct dns_query_st));
     stm_init(&sock->stm);
 
 
@@ -271,12 +266,14 @@ fail:
     }
 }
 
+static void
+socks5_done(struct selector_key* key);
 
 void socks5_handle_read(struct selector_key * key) {
     struct state_machine *stm = &ATTACHMENT(key)->stm;
     enum socks5_state state = stm_handler_read(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5((struct socks5 *) key); //TODO: Cambiar por socks5_done (aca significa que hubo un error y hay que terminar el proxy)
+        socks5_done(key);
     }
 
 }
@@ -285,7 +282,7 @@ void socks5_handle_write(struct selector_key * key){
 
     enum socks5_state state = stm_handler_write(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5((struct socks5 *)key);//TODO: Cambiar por socks5_done (aca significa que hubo un error y hay que terminar el proxy)
+        socks5_done(key);
 
     }
 
@@ -295,15 +292,39 @@ void socks5_handle_block(struct selector_key * key) {
 
     enum socks5_state state = stm_handler_block(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        destroy_socks5((struct socks5 *)key);//TODO: Cambiar por socks5_done (aca significa que hubo un error y hay que terminar el proxy)
+        socks5_done(key);
     }
 
 }
 void socks5_handle_close(struct selector_key * key) {
-    struct state_machine *stm = &ATTACHMENT(key)->stm;
-
-    stm_handler_close(stm, key);
+    destroy_socks5(ATTACHMENT(key));
     //TODO: Se deberia manejar error aca?
+
+}
+
+static void
+socks5_done(struct selector_key* key) {
+    struct socks5 * socks5 = ATTACHMENT(key);
+
+    const int fds[] = {
+            ATTACHMENT(key)->client_fd,
+            ATTACHMENT(key)->origin_fd,
+    };
+
+    //Reseting parsers
+    hello_reset(socks5->hello);
+    hello_auth_reset(socks5->hello_auth);
+    request_read_reset(socks5->request_read);
+
+
+    for(unsigned i = 0; i < N(fds); i++) {
+        if(fds[i] != -1) {
+            if(SELECTOR_SUCCESS != selector_unregister_fd(key->s, fds[i])) {
+                abort();
+            }
+            close(fds[i]);
+        }
+    }
 
 }
 

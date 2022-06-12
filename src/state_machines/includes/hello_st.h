@@ -12,7 +12,8 @@ struct hello_st {
     
 };
 
-void hello_init(const unsigned state, struct selector_key *key);   
+void hello_init(const unsigned state, struct selector_key *key);   //TODO: creo que tienen que retornar void *
+void hello_reset(struct hello_st * hello);
 unsigned hello_read(struct selector_key * key);
 unsigned hello_write(struct selector_key * key);
 

@@ -49,6 +49,17 @@ void hello_init(const unsigned state, struct selector_key *key) {
 //    st->ver_parser = parser_init(parser_no_classes(),st->ver_def);
 }
 
+void hello_reset(struct hello_st * hello){
+    hello->selected_method = -1;
+    if(hello->hello_parser != NULL && hello->hello_parser->methods != NULL){
+        free(hello->hello_parser->methods);
+        free(hello->hello_parser);
+    }
+
+
+
+}
+
 unsigned hello_read(struct selector_key * key) {
     struct socks5 * sock = ATTACHMENT(key);
     struct hello_parser * hp = sock->hello->hello_parser;
@@ -134,7 +145,7 @@ unsigned hello_write(struct selector_key * key) {
                 return HELLO_AUTH;
             }
             if(sock->hello->selected_method == NOAUTH) {
-//                return REQUEST_READING;
+                return REQUEST_READING;
             }
             if(sock -> hello->selected_method == NOMETHOD){
                 goto finally;

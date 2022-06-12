@@ -13,8 +13,8 @@
 
 #define AUTH_VERSION 0x01
 #define AUTH_RESPONSE 2
-#define STATUS_SUCCESS 0x00 
-#define STATUS_FAILURE 0x01 
+#define STATUS_SUCCESS 0x00
+#define STATUS_FAILURE 0x01
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
 
@@ -23,6 +23,13 @@ void hello_auth_init(const unsigned state, struct selector_key *key){
     st->hello_auth_parser = malloc(sizeof(struct hello_auth_parser));
     hello_auth_parser_init(st->hello_auth_parser);
 
+}
+
+void hello_auth_reset(struct hello_auth_st * ha){
+    ha->status = -1;
+    if(ha->hello_auth_parser != NULL){
+        free(ha->hello_auth_parser);
+    }
 }
 
 void hello_auth_response(buffer * b, struct hello_auth_st * hello_auth){
@@ -80,7 +87,6 @@ unsigned hello_auth_write(struct selector_key * key) {
                 }
                 return REQUEST_READING;
             } else {
-                    //TODO: cerrar conexion 
                     goto finally;
             }
 

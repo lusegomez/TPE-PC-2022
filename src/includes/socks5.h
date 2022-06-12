@@ -8,10 +8,15 @@
 #include "../state_machines/includes/hello_st.h"
 #include "../state_machines/includes/hello_auth_st.h"
 #include "../state_machines/includes/request_read_st.h"
+<<<<<<< HEAD
 #include "../state_machines/includes/connect_st.h"
+=======
+#include "../state_machines/includes/dns_query_st.h"
+>>>>>>> ipv6
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+#define N(x) (sizeof(x)/sizeof((x)[0]))
 #define MAX_POOL 500
 #define BUFFER_SIZE 2048
 
@@ -35,6 +40,8 @@ struct socks5 {
     struct hello_auth_st * hello_auth;
     struct request_read_st * request_read;
     struct connect_st * connect_origin; 
+    struct dns_query_st * dns_query;
+//    struct request_st request;
 //    struct copy copy;
 //
 //    struct copy copy_origin;
