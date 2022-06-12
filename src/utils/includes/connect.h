@@ -18,8 +18,8 @@ struct connect {
     uint8_t * destaddr;
     uint8_t port[2];
 
-    struct sockaddr_in * origin_addr;
-    struct sockaddr_in6 * origin_addr6;
+    struct sockaddr_in origin_addr;
+    struct sockaddr_in6 origin_addr6;
 };
 
 unsigned connect_init(struct selector_key *key);

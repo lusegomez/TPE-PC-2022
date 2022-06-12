@@ -47,10 +47,6 @@ const struct state_definition states_definition[] = {
             .on_block_ready = dns_query_close
         },
         {
-            .state = CONNECT_ORIGIN,
-//            .on_block_ready = connect_origin_block
-        },
-        {
             .state = RESPONSE_WRITING,
 //            .on_arrival = request_write_init,
 //            .on_write_ready = request_write,
@@ -106,10 +102,12 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->hello_auth = malloc(sizeof(struct hello_auth_st));
     sock->request_read = malloc(sizeof(struct request_read_st));
     sock->dns_query = malloc(sizeof(struct dns_query_st));
+    sock->connect_origin = malloc(sizeof(struct connect));
     memset(sock->hello, 0x00, sizeof(struct hello_st));
     memset(sock->hello_auth, 0x00, sizeof(struct hello_auth_st));
     memset(sock->request_read, 0x00, sizeof(struct request_read_st));
     memset(sock->dns_query, 0x00, sizeof(struct dns_query_st));
+    memset(sock->connect_origin, 0x00, sizeof(struct connect));
     stm_init(&sock->stm);
 
 

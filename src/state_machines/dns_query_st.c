@@ -13,6 +13,9 @@
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
 #include "../utils/includes/connect.h"
+#include "../utils/includes/util.h"
+
+#define FQDN 0x03
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 

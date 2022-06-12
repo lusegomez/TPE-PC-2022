@@ -64,7 +64,7 @@ unsigned request_read(struct selector_key * key) {
 
         }
     }
-    return rp->atype == FQDN ? DNS_QUERY : CONNECT_ORIGIN;
+    return rp->atype == FQDN ? DNS_QUERY : connect_init(key);
     finally:
     request_response(&sock->write_buffer, sock->request_read);
     return ERROR;

@@ -11,6 +11,7 @@
 #include "./includes/connect.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
+#include "../utils/includes/util.h"
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 #define IPV4 0x01
@@ -27,31 +28,28 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     if(selector_fd_set_nio(sock->origin_fd) < 0){
         goto finally;
     }
-    if(memset(conn->origin_addr, 0, sizeof(struct sockaddr_in)) == NULL){
-        goto finally;
-    }
-    if(memcpy(&conn->origin_addr->sin_addr, sock->request_read->req_parser->destaddr, sock->request_read->req_parser->destaddr_len) == NULL){
-        goto finally;
-    }
-    uint16_t aux = 0;
-    aux |= (uint16_t)sock->request_read->req_parser->port[0] << 8;
-    aux |= (uint16_t)sock->request_read->req_parser->port[1] << 8;
-    conn->origin_addr->sin_port = htons(aux);
-    conn->origin_addr->sin_family = AF_INET;
 
+    if(memcpy(&conn->origin_addr.sin_addr, sock->request_read->req_parser->destaddr, sock->request_read->req_parser->destaddr_len) == NULL){
+        goto finally;
+    }
+
+    uint16_t aux = ((uint16_t)sock->request_read->req_parser->port[0] << 8) | sock->request_read->req_parser->port[1];
+    conn->origin_addr.sin_port = aux;
+    conn->origin_addr.sin_family = AF_INET;
     
-    if(connect(sock->origin_fd, (struct sockaddr *) &conn->origin_addr, sizeof(conn->origin_addr)) < 0){
+    if(connect(sock->origin_fd, (const struct sockaddr *)&conn->origin_addr, sizeof(conn->origin_addr)) < 0){
+        int err = errno;
         if(errno == EINPROGRESS){   //La conexion es bloqueante y no se resuelve inmediatamente
             if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
                 goto finally;
             }
-            return CONNECT_ORIGIN;
+            return RESPONSE_WRITING;
         } else {
             goto finally;
         }
     }
 
-    return CONNECT_ORIGIN;
+    return RESPONSE_WRITING;
 finally:
     //Tengo que informar del error
     return RESPONSE_WRITING;
@@ -82,13 +80,16 @@ unsigned connect_origin(struct connect * conn, struct selector_key *key) {
 unsigned connect_init(struct selector_key *key){
     struct socks5 * sock = ATTACHMENT(key);
     struct connect * connection = sock->connect_origin;
-    enum socks5_state ret_state = CONNECT_ORIGIN;
+    enum socks5_state ret_state = RESPONSE_WRITING;
     //ACA TENGO EL PARSER CON LA INFO DE LA CONEXION:
     //DESTADDR Y ATYPE
     struct request_read_st * rqst_st = sock->request_read;  
-    
+    connection->destaddr = malloc(sizeof(rqst_st->req_parser->destaddr));
+    memset(connection->destaddr, 0x00, sizeof(rqst_st->req_parser->destaddr));
+
     connection->atype = rqst_st->req_parser->atype;
     connection->destaddr = (uint8_t *)strcpy((char *)connection->destaddr, (const char *) rqst_st->req_parser->destaddr);
+    connection->destaddr_len = strlen((const char *)connection->destaddr);
     if(connection->destaddr == NULL){
         return ERROR;
     }
