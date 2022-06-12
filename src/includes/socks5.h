@@ -8,11 +8,8 @@
 #include "../state_machines/includes/hello_st.h"
 #include "../state_machines/includes/hello_auth_st.h"
 #include "../state_machines/includes/request_read_st.h"
-<<<<<<< HEAD
 #include "../state_machines/includes/connect_st.h"
-=======
 #include "../state_machines/includes/dns_query_st.h"
->>>>>>> ipv6
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
@@ -41,10 +38,10 @@ struct socks5 {
     struct request_read_st * request_read;
     struct connect_st * connect_origin; 
     struct dns_query_st * dns_query;
-//    struct request_st request;
-//    struct copy copy;
-//
-//    struct copy copy_origin;
+    //    struct request_st request;
+    //    struct copy copy;
+    //
+    //    struct copy copy_origin;
 
 
     struct state_machine stm;
