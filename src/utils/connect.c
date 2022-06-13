@@ -9,7 +9,8 @@
 #include "./includes/connect.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
-#include "../utils/includes/response.h"
+#include "..//state_machines/includes/request_read_st.h"
+//#include "../utils/includes/response.h"
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 #define IPV4 0x01
@@ -43,7 +44,9 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
                     state = GENERAL_SOCKS_SERVER_FAILURE;
                     goto finally;
                 }
-                request_response(sock, SUCCEDED);
+
+                sock->request_read->status = SUCCEDED;
+                //response(sock, SUCCEDED);
                 return RESPONSE_WRITING;
             case ECONNREFUSED:
                 state = CONNECTION_REFUSED;
@@ -63,11 +66,52 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     }
     return RESPONSE_WRITING;
 finally:
-    request_response(sock, state);
+    sock->request_read->status = state;
+    //response(sock, state);
     return RESPONSE_WRITING;
 
 }
-unsigned connect_origin_fqdn(struct connect *conn, struct selector_key *key){}    //TODO: Implementar funcion
+
+
+unsigned connect_origin_fqdn(struct connect *conn, struct selector_key *key){
+    unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
+    struct socks5 * sock = ATTACHMENT(key);
+
+    struct addrinfo *rp;
+    for(rp = sock->origin_resolution; rp != NULL; rp = rp->ai_next){
+        sock->origin_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (sock->origin_fd == -1) {    
+            continue;   //PRUEBO OTRO
+        }
+        if(selector_fd_set_nio(sock->origin_fd) < 0){
+            state = GENERAL_SOCKS_SERVER_FAILURE;
+            goto finally;
+        }
+        if(connect(sock->origin_fd, rp->ai_addr, rp->ai_addrlen) < 0) {
+            if(errno == EINPROGRESS) {
+                if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
+                    state = GENERAL_SOCKS_SERVER_FAILURE;
+                    goto finally;
+                }
+                return RESPONSE_WRITING;
+            } else {
+                state = GENERAL_SOCKS_SERVER_FAILURE;
+                goto finally;
+            }
+        }
+    }
+    if (rp == NULL)
+    {
+        state = HOST_UNREACHABLE;
+    }
+finally:
+    if(sock->origin_fd > 0) {
+        selector_unregister_fd(key->s, sock->origin_fd);
+        close(sock->origin_fd);
+        sock->origin_fd = -1;
+    }
+    return state;
+}   
 unsigned connect_origin_ipv6(struct connect *conn, struct selector_key *key){}
 
 unsigned connect_origin(struct connect * conn, struct selector_key *key) {

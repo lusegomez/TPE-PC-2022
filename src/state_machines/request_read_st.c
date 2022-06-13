@@ -8,7 +8,8 @@
 #include "./includes/request_read_st.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
-#include "../utils/includes/response.h"
+//#include "../utils/includes/response.h"
+//#include "../utils/includes/response.h"
 
 #define IPV4 0x01
 #define FQDN 0x03
@@ -18,6 +19,30 @@
 #define SOCKSVERSION 0x05
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+
+#define RESPLEN 10
+#define IPV4 0x01
+
+
+void response(struct socks5 * sock){
+    buffer * b = &sock->write_buffer;
+    size_t n;
+    uint8_t * pointer = buffer_write_ptr(b,&n);
+    pointer[0] = SOCKSVERSION;
+    pointer[1] = sock->request_read->status;
+    pointer[2] = 0x00;
+    pointer[3] = IPV4;
+    pointer[4] = 0x00;
+    pointer[5] = 0x00;
+    pointer[6] = 0x00;
+    pointer[7] = 0x00;
+    pointer[8] = 0x00;
+    pointer[9] = 0x00;
+
+    buffer_write_adv(b, RESPLEN);
+}
+
+
 
 void request_read_init(const unsigned state, struct selector_key * key){
     struct request_read_st * st = ATTACHMENT(key)->request_read;
@@ -61,7 +86,9 @@ unsigned request_read(struct selector_key * key) {
                     state = GENERAL_SOCKS_SERVER_FAILURE;
                     break;
             }
-            request_response(sock, state);
+             sock->request_read->status = state;
+
+            //response(sock, state);
 
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
                 state = GENERAL_SOCKS_SERVER_FAILURE;
@@ -84,12 +111,15 @@ unsigned request_read(struct selector_key * key) {
             state = GENERAL_SOCKS_SERVER_FAILURE;
             break;
     }
-    request_response(sock, state);
+    sock->request_read->status = state;
+
+    //response(sock, state);
     return RESPONSE_WRITING;
 }
 
-unsigned request_write(struct selector_key * key){
+unsigned response_write(struct selector_key * key){
     struct socks5 * sock = ATTACHMENT(key);
+    response(sock);
     size_t n;
     uint8_t * pointer = buffer_read_ptr(&sock->write_buffer, &n);
     uint8_t ret_state = COPY;

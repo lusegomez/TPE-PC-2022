@@ -1,5 +1,5 @@
-#ifndef SOCKS5
-#define SOCKS5
+#ifndef SOCKS5_H
+#define SOCKS5_H
 
 #include "stm.h"
 #include "selector.h"
@@ -10,6 +10,7 @@
 #include "../state_machines/includes/request_read_st.h"
 #include "../utils/includes/connect.h"
 #include "../state_machines/includes/dns_query_st.h"
+#include "../state_machines/includes/copy_st.h"
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)

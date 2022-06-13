@@ -40,8 +40,6 @@ sigterm_handler(const int signal) {
 int
 main(const int argc, const char **argv) {
     parse_args(argc, (char **)argv, &args);
-    printf("%s", args.users[0].name);
-    printf("%s", args.users[0].pass);
     add_user(&args.users[0]);
  /*
     if(argc == 1) {

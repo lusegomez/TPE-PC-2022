@@ -1,5 +1,5 @@
-#ifndef SOCKS5_STATE
-#define SOCKS5_STATE
+#ifndef SOCKS5_STATE_H
+#define SOCKS5_STATE_H
 
 
 #include "stm.h"

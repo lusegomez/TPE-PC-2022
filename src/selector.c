@@ -407,6 +407,31 @@ selector_unregister_fd(fd_selector       s,
     finally:
     return ret;
 }
+selector_status selector_add_interest(fd_selector s, int fd, fd_interest i) {
+    if(s == NULL || INVALID_FD(fd)){
+        return SELECTOR_IARGS;
+    }
+    struct item * item = s->fds + fd;
+    if(!ITEM_USED(item)) {
+        return SELECTOR_IARGS;
+    }
+    item->interest |= i;
+    items_update_fdset_for_fd(s, item);
+    return SELECTOR_SUCCESS;
+}
+
+selector_status selector_remove_interest(fd_selector s, int fd, fd_interest i) {
+    if(s == NULL || INVALID_FD(fd)){ 
+        return SELECTOR_IARGS;
+    }
+    struct item * item = s->fds + fd;
+    if(!ITEM_USED(item)){
+        return SELECTOR_IARGS;
+    }
+    item->interest = INTEREST_OFF(item->interest, i);
+    items_update_fdset_for_fd(s, item);
+    return SELECTOR_SUCCESS;
+}
 
 selector_status
 selector_set_interest(fd_selector s, int fd, fd_interest i) {
