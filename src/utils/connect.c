@@ -130,6 +130,7 @@ unsigned connect_origin(struct connect * conn, struct selector_key *key) {
     default:
         break;
     }
+    return GENERAL_SOCKS_SERVER_FAILURE;
 }
 
 

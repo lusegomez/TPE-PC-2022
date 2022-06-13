@@ -39,7 +39,7 @@ struct socks5 {
     struct request_read_st * request_read;
     struct connect * connect_origin; 
     struct dns_query_st * dns_query;
-    //    struct request_st request;
+    struct copy_st * copy;
     //    struct copy copy;
     //
     //    struct copy copy_origin;
