@@ -28,6 +28,8 @@
 #include "./includes/args.h"
 #include "./utils/includes/users.h"
 
+#define N(x) (sizeof(x)/sizeof((x)[0]))
+
 struct socks5args args;
 static bool done = false;
 
@@ -40,7 +42,10 @@ sigterm_handler(const int signal) {
 int
 main(const int argc, const char **argv) {
     parse_args(argc, (char **)argv, &args);
-    add_user(&args.users[0]);
+    //for every user in the list, add them to the user list
+    for(int i = 0; i < N(args.users); i++) {
+        add_user(&args.users[i]);
+    }
  /*
     if(argc == 1) {
         // utilizamos el default
