@@ -3,20 +3,8 @@
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
-//void copy_init(const unsigned state, struct selector_key *key){
-//    struct socks5 * sock = ATTACHMENT(key);
-//    struct copy_st * copy = sock->copy;
-//
-//    copy->clt2srv = calloc(1, sizeof(buffer));
-//    //if(copy->clt2srv == NULL) return ERROR;
-//
-//    copy->srv2org = calloc(1, sizeof(buffer));
-//    //if(copy->srv2org == NULL) return ERROR;
-//
-//}
 unsigned copy_read(struct selector_key * key){
     struct socks5 *sock = ATTACHMENT(key);
-    struct copy_st * copy = sock->copy;
     buffer * buff;
     if(key->fd == sock->origin_fd) {
         buff = &sock->write_buffer;
@@ -41,6 +29,9 @@ unsigned copy_read(struct selector_key * key){
             goto finally;
         }
     } else if(ret == 0 || errno == ECONNRESET) {
+        if(selector_add_interest(key->s, key->fd == sock->client_fd ? sock->origin_fd : sock->client_fd, OP_READ) != SELECTOR_SUCCESS)  {
+            goto finally;
+        }
         if(selector_remove_interest(key->s, key->fd, OP_READ) != SELECTOR_SUCCESS){ //YA LEI TODO
             goto finally;
         }
@@ -71,7 +62,7 @@ unsigned copy_write(struct selector_key * key){
                 goto finally;
             }
         }
-        if(selector_add_interest(key->s, key->fd, OP_READ) != SELECTOR_SUCCESS) {
+        if(selector_add_interest(key->s, key->fd == sock->client_fd ? sock->origin_fd : sock->client_fd, OP_READ) != SELECTOR_SUCCESS) {
             goto finally;
         }
         return COPY;

@@ -16,7 +16,7 @@
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 #define MAX_POOL 500
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 4096
 
 struct socks5 {
     //Client data
@@ -40,9 +40,6 @@ struct socks5 {
     struct connect * connect_origin; 
     struct dns_query_st * dns_query;
     struct copy_st * copy;
-    //    struct copy copy;
-    //
-    //    struct copy copy_origin;
 
 
     struct state_machine stm;

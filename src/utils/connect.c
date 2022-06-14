@@ -34,13 +34,13 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     }
 
     uint16_t aux = ((uint16_t)sock->request_read->req_parser->port[0] << 8) | sock->request_read->req_parser->port[1];
-    conn->origin_addr.sin_port = aux;
+    conn->origin_addr.sin_port = htons(aux);
     conn->origin_addr.sin_family = AF_INET;
     
     if(connect(sock->origin_fd, (const struct sockaddr *)&conn->origin_addr, sizeof(conn->origin_addr)) < 0){
         switch (errno) {
             case EINPROGRESS:
-                if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
+                if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_READ, key->data) != SELECTOR_SUCCESS){
                     state = GENERAL_SOCKS_SERVER_FAILURE;
                     goto finally;
                 }
@@ -73,7 +73,7 @@ finally:
 }
 
 
-unsigned connect_origin_fqdn(struct connect *conn, struct selector_key *key){
+unsigned connect_origin_fqdn(struct selector_key *key){
     unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
     struct socks5 * sock = ATTACHMENT(key);
 
@@ -89,10 +89,11 @@ unsigned connect_origin_fqdn(struct connect *conn, struct selector_key *key){
         }
         if(connect(sock->origin_fd, rp->ai_addr, rp->ai_addrlen) < 0) {
             if(errno == EINPROGRESS) {
-                if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_WRITE, key->data) != SELECTOR_SUCCESS){
+                if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_READ, key->data) != SELECTOR_SUCCESS){
                     state = GENERAL_SOCKS_SERVER_FAILURE;
                     goto finally;
                 }
+                sock->request_read->status = SUCCEDED;
                 return RESPONSE_WRITING;
             } else {
                 state = GENERAL_SOCKS_SERVER_FAILURE;
@@ -112,7 +113,7 @@ finally:
     }
     return state;
 }   
-unsigned connect_origin_ipv6(struct connect *conn, struct selector_key *key){}
+unsigned connect_origin_ipv6(struct selector_key *key){}
 
 unsigned connect_origin(struct connect * conn, struct selector_key *key) {
     switch (conn->atype)
@@ -121,10 +122,10 @@ unsigned connect_origin(struct connect * conn, struct selector_key *key) {
         return connect_origin_ipv4(conn, key);
         break;
     case FQDN:
-        return connect_origin_fqdn(conn, key);       //TODO: Implementar funcion
+        return connect_origin_fqdn(key);       //TODO: Implementar funcion
         break;
     case IPV6:
-        return connect_origin_ipv6(conn, key);
+        return connect_origin_ipv6(key);
         break;
     
     default:
@@ -145,7 +146,7 @@ unsigned connect_init(struct selector_key *key){
     memset(connection->destaddr, 0x00, sizeof(rqst_st->req_parser->destaddr));
 
     connection->atype = rqst_st->req_parser->atype;
-    connection->destaddr = (uint8_t *)strcpy((char *)connection->destaddr, (const char *) rqst_st->req_parser->destaddr);
+    memcpy(connection->destaddr, rqst_st->req_parser->destaddr, rqst_st->req_parser->destaddr_len);
     connection->destaddr_len = strlen((const char *)connection->destaddr);
     if(connection->destaddr == NULL){
         return ERROR;
