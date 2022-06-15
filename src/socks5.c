@@ -71,24 +71,23 @@ const struct state_definition states_definition[] = {
 
 static struct socks5 * create_new_sock5(int client_fd) {
 
-    struct socks5 * sock;
-
-    if (pool == NULL) {
-        sock = malloc(sizeof(*sock));
-        //parsers_init(sock);
-    }
-    else {
-        sock       = pool;
-        pool        = pool->next;
-        sock->next = 0;
-        //Resetear parsers
-    }
-
+    struct socks5 * sock = malloc(sizeof(struct socks5));
     if(sock == NULL){
         goto finally;
     }
-
     memset(sock, 0x00, sizeof(*sock));
+    sock->hello = malloc(sizeof(struct hello_st));
+    sock->hello_auth = malloc(sizeof(struct hello_auth_st));
+    sock->request_read = malloc(sizeof(struct request_read_st));
+    sock->dns_query = malloc(sizeof(struct dns_query_st));
+    sock->connect_origin = malloc(sizeof(struct connect));
+
+
+    memset(sock->hello, 0x00, sizeof(struct hello_st));
+    memset(sock->hello_auth, 0x00, sizeof(struct hello_auth_st));
+    memset(sock->request_read, 0x00, sizeof(struct request_read_st));
+    memset(sock->dns_query, 0x00, sizeof(struct dns_query_st));
+    memset(sock->connect_origin, 0x00, sizeof(struct connect));
 
     sock->client_fd = client_fd;
     sock->origin_fd = -1;
@@ -96,16 +95,7 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->stm.initial = HELLO;
     sock->stm.max_state = ERROR;
     sock->stm.states = states_definition;
-    sock->hello = malloc(sizeof(struct hello_st));
-    sock->hello_auth = malloc(sizeof(struct hello_auth_st));
-    sock->request_read = malloc(sizeof(struct request_read_st));
-    sock->dns_query = malloc(sizeof(struct dns_query_st));
-    sock->connect_origin = malloc(sizeof(struct connect));
-    memset(sock->hello, 0x00, sizeof(struct hello_st));
-    memset(sock->hello_auth, 0x00, sizeof(struct hello_auth_st));
-    memset(sock->request_read, 0x00, sizeof(struct request_read_st));
-    memset(sock->dns_query, 0x00, sizeof(struct dns_query_st));
-    memset(sock->connect_origin, 0x00, sizeof(struct connect));
+
     stm_init(&sock->stm);
 
 
@@ -118,48 +108,59 @@ finally:
     return sock;
 }
 
-/* realmente destruye */
-static void destroy_socks5_(struct socks5 * socks) {
-    if(socks->origin_resolution != NULL) {
-        freeaddrinfo(socks->origin_resolution);
-        socks->origin_resolution = NULL;
-    }
-    if(socks->current_origin_resolution != NULL) {
-        freeaddrinfo(socks->current_origin_resolution);
-        socks->current_origin_resolution = NULL;
-    }
-
-    //Destroy parsers
-
-    free(socks);
-}
-
+void free_socks5(struct socks5 * sock);
 static void
-destroy_socks5(struct socks5 *s) {
-    if(s == NULL) {
-        // nada para hacer
-    } else if(s->references == 1) {
-        if(s != NULL) {
-            if(pool_size < MAX_POOL) {
-                s->next = pool;
-                pool    = s;
-                pool_size++;
-            } else {
-                destroy_socks5_(s);
-            }
+destroy_socks5(struct selector_key *key) {
+    struct socks5 * sock = ATTACHMENT(key);
+    if(sock->client_fd != -1) {
+        if(selector_unregister_fd(key->s, sock->client_fd) != SELECTOR_SUCCESS) {
+            exit(EXIT_FAILURE);
         }
-    } else {
-        s->references -= 1;
+        close(sock->client_fd);
     }
+    if (sock->origin_fd != -1) {
+        if(selector_unregister_fd(key->s, sock->origin_fd) != SELECTOR_SUCCESS) {
+            exit(EXIT_FAILURE);
+        }
+        close(sock->origin_fd);
+    }
+
+    // recursivley free all the memory allocated for the socks5 structure
+    free_socks5(sock);
+
 }
 
-void
-socksv5_pool_destroy(void) {
-     struct socks5 *next, *s;
-     for(s = pool; s != NULL ; s = next) {
-            next = s->next;
-             free(s);
-         }
+void free_socks5(struct socks5 * sock) {
+    if(sock->hello != NULL) {
+        if(sock->hello->hello_parser != NULL && sock->hello->hello_parser->methods != NULL) {
+            free(sock->hello->hello_parser->methods);
+            free(sock->hello->hello_parser);
+        }
+        free(sock->hello);
+    }
+    if(sock->hello_auth != NULL) {
+        if(sock->hello_auth->hello_auth_parser != NULL) {
+            free(sock->hello_auth->hello_auth_parser);
+        }
+        free(sock->hello_auth);
+    }
+    if(sock->request_read != NULL) {
+        if(sock->request_read->req_parser != NULL && sock->request_read->req_parser->destaddr != NULL) {
+            free(sock->request_read->req_parser->destaddr);
+            free(sock->request_read->req_parser);
+        }
+        free(sock->request_read);
+    }
+    if(sock->dns_query != NULL) {
+        free(sock->dns_query);
+    }
+    if(sock->connect_origin != NULL) {
+        if(sock->connect_origin->destaddr != NULL) {
+            free(sock->connect_origin->destaddr);
+        }
+        free(sock->connect_origin);
+    }
+    free(sock);
 }
 
 //
@@ -256,18 +257,16 @@ fail:
         close(client_sock);
     }
     if(state != NULL) {
-        destroy_socks5(state);
+        destroy_socks5(key);
     }
 }
 
-static void
-socks5_done(struct selector_key* key);
 
 void socks5_handle_read(struct selector_key * key) {
     struct state_machine *stm = &ATTACHMENT(key)->stm;
     enum socks5_state state = stm_handler_read(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        socks5_done(key);
+        destroy_socks5(key);
     }
 
 }
@@ -276,7 +275,7 @@ void socks5_handle_write(struct selector_key * key){
 
     enum socks5_state state = stm_handler_write(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        socks5_done(key);
+        destroy_socks5(key);
 
     }
 
@@ -286,40 +285,15 @@ void socks5_handle_block(struct selector_key * key) {
 
     enum socks5_state state = stm_handler_block(stm, key);
     if(state == ERROR || state == CLOSE_CONNECTION) {
-        socks5_done(key);
+        destroy_socks5(key);
     }
 
 }
 void socks5_handle_close(struct selector_key * key) {
-    destroy_socks5(ATTACHMENT(key));
+
     //TODO: Se deberia manejar error aca?
 
 }
 
-static void
-socks5_done(struct selector_key* key) {
-    struct socks5 * socks5 = ATTACHMENT(key);
-
-    const int fds[] = {
-            ATTACHMENT(key)->client_fd,
-            ATTACHMENT(key)->origin_fd,
-    };
-
-    //Reseting parsers
-    hello_reset(socks5->hello);
-    hello_auth_reset(socks5->hello_auth);
-    request_read_reset(socks5->request_read);
-
-
-    for(unsigned i = 0; i < N(fds); i++) {
-        if(fds[i] != -1) {
-            if(SELECTOR_SUCCESS != selector_unregister_fd(key->s, fds[i])) {
-                abort();
-            }
-            close(fds[i]);
-        }
-    }
-
-}
 
 

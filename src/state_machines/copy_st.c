@@ -74,8 +74,11 @@ unsigned copy_write(struct selector_key * key){
             if(selector_remove_interest(key->s, key->fd, OP_WRITE) != SELECTOR_SUCCESS){
                 goto finally;
             }
+            if(sock->closing){
+                return CLOSE_CONNECTION;
+            }
         }
-        if(selector_add_interest(key->s, key->fd == sock->client_fd ? sock->origin_fd : sock->client_fd, OP_READ) != SELECTOR_SUCCESS) {
+        if(!sock->closing && selector_add_interest(key->s, key->fd == sock->client_fd ? sock->origin_fd : sock->client_fd, OP_READ) != SELECTOR_SUCCESS) {
             goto finally;
         }
 
