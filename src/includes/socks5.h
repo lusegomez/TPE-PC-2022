@@ -16,7 +16,7 @@
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 #define MAX_POOL 500
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 2048
 
 struct socks5 {
     //Client data
