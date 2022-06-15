@@ -40,6 +40,7 @@ struct socks5 {
     struct connect * connect_origin; 
     struct dns_query_st * dns_query;
     struct copy_st * copy;
+    bool closing;
 
 
     struct state_machine stm;

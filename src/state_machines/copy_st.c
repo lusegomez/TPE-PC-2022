@@ -41,6 +41,13 @@ unsigned copy_read(struct selector_key * key){
         if(selector_remove_interest(key->s, key->fd, OP_READ) != SELECTOR_SUCCESS){ //YA LEI TODO
             goto finally;
         }
+        if(!buffer_can_read(buff)){
+            return CLOSE_CONNECTION;
+        } else {
+            sock->closing = true;
+        }
+    } else {
+        goto finally;
     }
 
     return is_socket_closed(key->fd) ? ERROR : COPY;
@@ -72,8 +79,15 @@ unsigned copy_write(struct selector_key * key){
             goto finally;
         }
 
+        if(sock->closing){
+            return CLOSE_CONNECTION;
+        }
+
+    } else {
+        goto finally;
     }
     return is_socket_closed(key->fd) ? ERROR : COPY;
 finally:
     return ERROR;
 }
+
