@@ -3,6 +3,15 @@
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
+//Check if socket connection was closed
+bool is_socket_closed(int fd){
+    int error = 0;
+    socklen_t len = sizeof(error);
+    getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &len);
+    return error != 0;
+}
+
+
 unsigned copy_read(struct selector_key * key){
     struct socks5 *sock = ATTACHMENT(key);
     buffer * buff;
@@ -29,15 +38,12 @@ unsigned copy_read(struct selector_key * key){
             goto finally;
         }
     } else if(ret == 0 || errno == ECONNRESET) {
-        if(selector_add_interest(key->s, key->fd == sock->client_fd ? sock->origin_fd : sock->client_fd, OP_READ) != SELECTOR_SUCCESS)  {
-            goto finally;
-        }
         if(selector_remove_interest(key->s, key->fd, OP_READ) != SELECTOR_SUCCESS){ //YA LEI TODO
             goto finally;
         }
     }
 
-    return COPY;
+    return is_socket_closed(key->fd) ? ERROR : COPY;
 finally:
     return ERROR;
 }
@@ -65,8 +71,9 @@ unsigned copy_write(struct selector_key * key){
         if(selector_add_interest(key->s, key->fd == sock->client_fd ? sock->origin_fd : sock->client_fd, OP_READ) != SELECTOR_SUCCESS) {
             goto finally;
         }
-        return COPY;
+
     }
+    return is_socket_closed(key->fd) ? ERROR : COPY;
 finally:
     return ERROR;
 }

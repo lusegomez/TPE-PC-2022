@@ -93,7 +93,6 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->client_fd = client_fd;
     sock->origin_fd = -1;
 
-
     sock->stm.initial = HELLO;
     sock->stm.max_state = ERROR;
     sock->stm.states = states_definition;
