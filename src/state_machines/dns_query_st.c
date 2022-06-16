@@ -65,6 +65,7 @@ void dns_query_init(const unsigned state, struct selector_key *key){
         sock->dns_query->status = dns_query_fail;
     }
 
+
 }
 
 unsigned dns_query_close(struct selector_key * key){

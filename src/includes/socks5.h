@@ -63,12 +63,12 @@ void socks5_handle_read(struct selector_key * key);
 void socks5_handle_write(struct selector_key * key);
 void socks5_handle_block(struct selector_key * key);
 void socks5_handle_close(struct selector_key * key);
+void socksv5_pool_destroy();
 
 static const fd_handler socks5_active_handler = {
     .handle_read = socks5_handle_read,
     .handle_write = socks5_handle_write,
     .handle_block = socks5_handle_block,
-    .handle_close = socks5_handle_close
 };
 
 

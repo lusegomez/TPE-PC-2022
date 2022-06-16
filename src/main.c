@@ -46,25 +46,7 @@ main(const int argc, const char **argv) {
     for(int i = 0; i < N(args.users); i++) {
         add_user(&args.users[i]);
     }
- /*
-    if(argc == 1) {
-        // utilizamos el default
-    } else if(argc == 2) {
-        char *end     = 0;
-        const long sl = strtol(argv[1], &end, 10);
 
-        if (end == argv[1]|| '\0' != *end 
-           || ((LONG_MIN == sl || LONG_MAX == sl) && ERANGE == errno)
-           || sl < 0 || sl > USHRT_MAX) {
-            fprintf(stderr, "port should be an integer: %s\n", argv[1]);
-            return 1;
-        }
-        port = sl;
-    } else {
-        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
-        return 1;
-    }
-*/
     // no tenemos nada que leer de stdin
     close(0);
 
@@ -149,7 +131,7 @@ main(const int argc, const char **argv) {
     const struct fd_handler socksv5 = {
         .handle_read       = socksv5_passive_accept,
         .handle_write      = NULL,
-        .handle_close      = NULL, // nada que liberar
+        .handle_close      = NULL,
     };
 
     bool ipv4_flag = false;
@@ -214,7 +196,7 @@ finally:
         close(passive_socket_ipv6);
     }
     
-    //socksv5_pool_destroy();
+    socksv5_pool_destroy();
 /*
     close(server);
     if(server >= 0) {

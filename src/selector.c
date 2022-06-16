@@ -343,7 +343,7 @@ selector_register(fd_selector        s,
     }
     // 1. tenemos espacio?
     size_t ufd = (size_t)fd;
-    if(ufd > s->fd_size) {
+    if(ufd >= s->fd_size) { //aca era solo >
         ret = ensure_capacity(s, ufd);
         if(SELECTOR_SUCCESS != ret) {
             goto finally;
@@ -509,22 +509,24 @@ handle_block_notifications(fd_selector s) {
             .s = s,
     };
     pthread_mutex_lock(&s->resolution_mutex);
-    for(struct blocking_job *j = s->resolution_jobs;
-        j != NULL ;
-        j  = j->next) {
-
-        struct item *item = s->fds + j->fd;
+    struct blocking_job *j = s->resolution_jobs;
+    struct blocking_job * prev = NULL;
+    while(j != NULL) {
+        prev = j;
+        j = j->next;
+        struct item *item = s->fds + prev->fd;
         if(ITEM_USED(item)) {
             key.fd   = item->fd;
             key.data = item->data;
             item->handler->handle_block(&key);
         }
 
-        free(j);
+        free(prev);
     }
     s->resolution_jobs = 0;
     pthread_mutex_unlock(&s->resolution_mutex);
 }
+
 
 
 selector_status
@@ -575,7 +577,7 @@ selector_select(fd_selector s) {
             case EBADF:
                 // ayuda a encontrar casos donde se cierran los fd pero no
                 // se desregistraron
-                for(int i = 0 ; i < s->max_fd; i++) {
+                for(int i = 0 ; i <= s->max_fd; i++) { // Aca era solo <
                     if(FD_ISSET(i, &s->master_r)|| FD_ISSET(i, &s->master_w)) {
                         if(-1 == fcntl(i, F_GETFD, 0)) {
                             fprintf(stderr, "Bad descriptor detected: %d\n", i);

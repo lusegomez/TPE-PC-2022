@@ -142,12 +142,12 @@ unsigned connect_init(struct selector_key *key){
     //ACA TENGO EL PARSER CON LA INFO DE LA CONEXION:
     //DESTADDR Y ATYPE
     struct request_read_st * rqst_st = sock->request_read;  
-    connection->destaddr = malloc(sizeof(rqst_st->req_parser->destaddr));
-    memset(connection->destaddr, 0x00, sizeof(rqst_st->req_parser->destaddr));
+    connection->destaddr = malloc(rqst_st->req_parser->destaddr_len);
+    memset(connection->destaddr, 0x00, rqst_st->req_parser->destaddr_len);
 
     connection->atype = rqst_st->req_parser->atype;
     memcpy(connection->destaddr, rqst_st->req_parser->destaddr, rqst_st->req_parser->destaddr_len);
-    connection->destaddr_len = strlen((const char *)connection->destaddr);
+    connection->destaddr_len = rqst_st->req_parser->destaddr_len;
     if(connection->destaddr == NULL){
         return ERROR;
     }
