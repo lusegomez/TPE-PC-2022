@@ -69,7 +69,6 @@ const struct state_definition states_definition[] = {
 static struct socks5 * create_new_sock5(int client_fd) {
 
     struct socks5 * sock = malloc(sizeof(struct socks5));
-<<<<<<< HEAD
     memset(sock, 0x00, sizeof(*sock));
     if(sock == NULL){
         goto finally;
@@ -82,13 +81,6 @@ static struct socks5 * create_new_sock5(int client_fd) {
         pool = sock;
     }
 
-
-=======
-    if(sock == NULL){
-        goto finally;
-    }
-    memset(sock, 0x00, sizeof(*sock));
->>>>>>> 0c87e339dbcb00a4a7c047dcfb5022e2498b282a
     sock->hello = malloc(sizeof(struct hello_st));
     sock->hello_auth = malloc(sizeof(struct hello_auth_st));
     sock->request_read = malloc(sizeof(struct request_read_st));
@@ -120,7 +112,7 @@ static struct socks5 * create_new_sock5(int client_fd) {
 finally:
     return sock;
 }
-<<<<<<< HEAD
+
 void free_socks5(struct socks5 * sock);
 //remove sock from pool
 static void remove_sock(struct socks5 * sock) {
@@ -137,11 +129,7 @@ static void remove_sock(struct socks5 * sock) {
     free_socks5(sock);
 }
 
-
-=======
-
 void free_socks5(struct socks5 * sock);
->>>>>>> 0c87e339dbcb00a4a7c047dcfb5022e2498b282a
 static void
 destroy_socks5(struct selector_key *key) {
     struct socks5 * sock = ATTACHMENT(key);
@@ -157,13 +145,7 @@ destroy_socks5(struct selector_key *key) {
         }
         close(sock->origin_fd);
     }
-<<<<<<< HEAD
     remove_sock(sock);
-=======
-
-    // recursivley free all the memory allocated for the socks5 structure
-    free_socks5(sock);
->>>>>>> 0c87e339dbcb00a4a7c047dcfb5022e2498b282a
 
 }
 
@@ -197,12 +179,10 @@ void free_socks5(struct socks5 * sock) {
         }
         free(sock->connect_origin);
     }
-<<<<<<< HEAD
+
     if(sock->origin_resolution != NULL) {
         freeaddrinfo(sock->origin_resolution);
     }
-=======
->>>>>>> 0c87e339dbcb00a4a7c047dcfb5022e2498b282a
     free(sock);
 }
 
@@ -332,11 +312,7 @@ void socks5_handle_block(struct selector_key * key) {
 }
 
 void socks5_handle_close(struct selector_key * key) {
-<<<<<<< HEAD
     destroy_socks5(key);
-=======
-
->>>>>>> 0c87e339dbcb00a4a7c047dcfb5022e2498b282a
     //TODO: Se deberia manejar error aca?
 
 }
