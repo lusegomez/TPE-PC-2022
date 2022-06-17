@@ -2,6 +2,7 @@
 #define __logger_h_
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 /* 
 *  Macros y funciones simples para log de errores.
@@ -20,10 +21,14 @@ void setLogLevel(LOG_LEVEL newLevel);
 
 char * levelDescription(LOG_LEVEL level);
 
+
+void log(LOG_LEVEL level, char * fmt, ...);
+/*
 // Debe ser una macro para poder obtener nombre y linea de archivo. 
 #define log(level, fmt, ...)   {if(level >= current_level) {\
 	fprintf (stderr, "%s: %s:%d, ", levelDescription(level), __FILE__, __LINE__); \
 	fprintf(stderr, fmt, ##__VA_ARGS__); \
 	fprintf(stderr,"\n"); }\
 	if ( level==FATAL) exit(1);}
+*/
 #endif

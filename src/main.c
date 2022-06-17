@@ -42,6 +42,7 @@ sigterm_handler(const int signal) {
 
 int
 main(const int argc, const char **argv) {
+    log(INFO, "%s", "Iniciando proxy...");
     parse_args(argc, (char **)argv, &args);
     //for every user in the list, add them to the user list
     for(int i = 0; i < N(args.users); i++) {
@@ -64,62 +65,28 @@ main(const int argc, const char **argv) {
 
     int error_ipv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
     if(error_ipv4 == -1) {
-        printf("Error al crear socket IPv4 \n");
+        log(INFO, "%s ", "Error al crear socket IPv4");
     }
     int error_ipv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
     if(error_ipv6 == -1) {
-        printf("Error al crear socket IPv6 \n");
+        log(INFO, "%s ", "Error al crear socket IPv6");
     }
     int error_mngt_ipv4 = create_passive_socket_mngt_ipv4(&passive_socket_mngt_ipv4, args);
     if(error_mngt_ipv4 == -1){
-        printf("Error al crear socket SCTP IPv4");
+        log(INFO, "%s ", "Error al crear socket  SCTP IPv4");
     }
     int error_mngt_ipv6 = create_passive_socket_mngt_ipv6(&passive_socket_mngt_ipv6, args);
     if(error_mngt_ipv6 == -1){
-        printf("Error al crear socket SCTP IPv6");
+        log(INFO, "%s ", "Error al crear socket  SCTP IPv6");
     }
     if ((error_ipv4 == -1 && error_ipv6 == -1) || (error_mngt_ipv4 == -1 && error_mngt_ipv6 == -1))
     {
+        err_msg = "No se pudieron crear los sockets pasivos";
         goto finally;
     }
-    fprintf(stdout, "[PROXY] Listening on TCP port %d\n", args.socks_port);
-    fprintf(stdout, "[MANAGEMENT] Listening on SCTP port %d\n", args.mng_port);
-/*    
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family      = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port        = htons(port);
-    const int server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(server < 0) {
-        err_msg = "unable to create socket";
-        goto finally;
-    }
+    log(INFO, "%s %d", "[PROXY] Listening on TCP port", args.socks_port);
+    log(INFO, "%s %d ", "[PROXY] Listening on SCTP port", args.mng_port);
 
-
-    // man 7 ip. no importa reportar nada si falla.
-    setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
-
-    if(bind(server, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-        err_msg = "unable to bind socket";
-        goto finally;
-    }
-
-    if (listen(server, 20) < 0) {
-        err_msg = "unable to listen";
-        goto finally;
-    }
-
-    // registrar sigterm es útil para terminar el programa normalmente.
-    // esto ayuda mucho en herramientas como valgrind.
-    signal(SIGTERM, sigterm_handler);
-    signal(SIGINT,  sigterm_handler);
-
-    if(selector_fd_set_nio(server) == -1) {
-        err_msg = "getting server socket flags";
-        goto finally;
-    }
-*/
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
 
@@ -158,33 +125,36 @@ main(const int argc, const char **argv) {
         ss = selector_register(selector, passive_socket_ipv4, &socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv4_flag = true;
-            err_msg = "Error registering IPv4 Socket";
         }
     }
     if(passive_socket_ipv6 != -1){
         ss = selector_register(selector, passive_socket_ipv6, &socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv6_flag = true;
-            err_msg = "Error registering IPv6 Socket";
         }
     }
     if(passive_socket_mngt_ipv4 != -1){
         ss = selector_register(selector, passive_socket_mngt_ipv4, &mngt_socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv4_mngt_flag = true;
-            err_msg = "Error registering IPv4 Management Socket";
         }
     }
     if(passive_socket_mngt_ipv6 != -1){
         ss = selector_register(selector, passive_socket_mngt_ipv6, &mngt_socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv6_mngt_flag = true;
-            err_msg = "Error registering IPv6 Management Socket";
         }
     }
 
+    if((ipv4_flag && ipv6_flag)){
+        err_msg = "Error registrando los sockets para el proxy";
+        goto finally;
+    }
 
-    if((ipv4_flag && ipv6_flag) || (ipv4_mngt_flag && ipv6_mngt_flag)) goto finally;
+    if((ipv4_mngt_flag && ipv6_mngt_flag)){
+        err_msg = "Error registrando los sockets para el protocolo de monitoreo";
+        goto finally;
+    }       
   
     for(;!done;) {
         err_msg = NULL;
@@ -201,10 +171,13 @@ main(const int argc, const char **argv) {
     int ret = 0;
 finally:
     if(ss != SELECTOR_SUCCESS) {
+        log(ERROR, "%s: %s", err_msg, ss == SELECTOR_IO? strerror(errno) : selector_error(ss));
+        /*
         fprintf(stderr, "%s: %s\n", (err_msg == NULL) ? "": err_msg,
                                   ss == SELECTOR_IO
                                       ? strerror(errno)
                                       : selector_error(ss));
+        */
         ret = 2;
     } else if(err_msg) {
         perror(err_msg);
@@ -228,10 +201,6 @@ finally:
         close(passive_socket_mngt_ipv6);
     }
     socksv5_pool_destroy();
-/*
-    close(server);
-    if(server >= 0) {
-        close(server);
-    }*/
+
     return ret;
 }

@@ -9,6 +9,8 @@
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
 
+#include "../utils/includes/logger.h"
+
 #define HELLORESPONSE 2
 #define SOCKSVERSION 0x05
 #define NOAUTH 0X00
@@ -17,26 +19,6 @@
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
-//struct hello_st * init_parser_definition(struct hello_st * st){
-//    st->ver_def = malloc(sizeof(struct parser_definition));
-//    char str[2] = "\0"; /* gives {\0, \0} */
-//    str[0] = 5;
-//    struct parser_definition pd = parser_utils_strcmpi(str);
-//    memcpy(st->ver_def, &pd, sizeof(struct parser_definition));
-//    return st;
-//}
-//
-//void destroy_parser_definition(struct hello_st * st){
-//    parser_utils_strcmpi_destroy(st->ver_def);
-//    free(st->ver_def);
-//}
-//
-//void initialize_parsers(struct selector_key * key) {
-//    struct socks5 * sock = ATTACHMENT(key);
-//    sock->hello->ver_parser = parser_init(parser_no_classes(), sock->hello->ver_def);
-//
-//}
-
 void hello_response(buffer * b, struct hello_st * hello);
 
 void hello_init(const unsigned state, struct selector_key *key) {
@@ -44,9 +26,7 @@ void hello_init(const unsigned state, struct selector_key *key) {
     st->selected_method = -1;
     st->hello_parser = malloc(sizeof(struct hello_parser));
     hello_parser_init(st->hello_parser);
-    //TODO: Init parser
-//    st = init_parser_definition(st);
-//    st->ver_parser = parser_init(parser_no_classes(),st->ver_def);
+    log(DEBUG, "%s: %s:%d", "Hello parser inicializado", __FILE__, __LINE__);
 }
 
 void hello_reset(struct hello_st * hello){
