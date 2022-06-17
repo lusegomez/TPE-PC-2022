@@ -14,7 +14,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include "include/argsctl.h"
+#include "includes/argsctl.h"
 
 #define STATSC 0
 #define LOGOUTC 1
@@ -47,7 +47,13 @@ typedef enum command_parser_states
 
 char * help_message = "These are all available commmands:\n"
                       "STATS\t\tPrints useful statistics about the proxy server\n"
-                      "LOGOUT\t\tDisconnects admin client\n"
+                      "CLOSE_CONNECTION\t\tDisconnects admin client\n"
+                      "DISECTOR_ACTIVATION\t\tActivates or deactivates the disector\n"
+                      "DISECTOR_DATA\t\t\tGets data from the disector\n"
+                      "ADD_USER <user:pass>\t\t\tAdds a new user to the system\n"
+                      "DELETE_USER <user>\t\t\tDeletes a user from the system\n"
+                      "LIST_USERS\t\t\tLists all users in the system\n"
+                      "USER_ACCESS_HISTORY <user>\t\tGets the access history of a user\n"
                       "HELP\t\tPrints this message\n";
 
 static unsigned
@@ -72,8 +78,6 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
                     state = L;
                 } else if (c == 'S') {
                     state = S;
-                } else if (c == 'G') {
-                    state = G;
                 } else if (c == 'H') {
                     state = H;
                 } else {

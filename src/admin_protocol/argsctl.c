@@ -8,14 +8,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "include/argsctl.h"
-#include "include/logger.h"
+#include "./includes/argsctl.h"
 
 
 void
 admin_usage() {
     printf(
-            "socks5ctl [-h] [-L <management-address>] [-P <management-port>]\n"
+            "socks5dctl [-h] [-L <management-address>] [-P <management-port>]\n"
     );
 }
 
@@ -23,7 +22,7 @@ void
 help_admin() {
     printf(
             "USAGE\n"
-            "    socks5ctl [OPTIONS]\n"
+            "    socks5dctl [OPTIONS]\n"
             "\n"
             "ARGUMENTS\n"
             "-h\n"

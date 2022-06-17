@@ -38,7 +38,7 @@ admin_describe_states(void)
 
 static void
 admin_read(struct selector_key *key) {
-    struct state_machine *stm = &ATTACHMENT(key)->stm;
+    struct state_machine *stm = &ADMIN_ATTACHMENT(key)->stm;
     const enum admin_states st = stm_handler_read(stm,key);
 
     if (AERROR == st || ADONE == st) {
@@ -48,7 +48,7 @@ admin_read(struct selector_key *key) {
 
 static void
 admin_write(struct selector_key *key) {
-    struct state_machine *stm = &ATTACHMENT(key)->stm;
+    struct state_machine *stm = &ADMIN_ATTACHMENT(key)->stm;
     const enum admin_states st = stm_handler_write(stm,key);
 
     if (AERROR == st || ADONE == st) {
@@ -86,7 +86,7 @@ admin_destroy(struct admin * admin) {
 
 static void
 admin_close(struct selector_key *key) {
-    admin_destroy(ATTACHMENT(key));
+    admin_destroy(ADMIN_ATTACHMENT(key));
 }
 
 
@@ -95,7 +95,7 @@ admin_done(struct selector_key* key) {
 
     const int fds[] = {
 
-            ATTACHMENT(key)->client_fd,
+            ADMIN_ATTACHMENT(key)->client_fd,
 
     };
 
@@ -178,7 +178,7 @@ new_admin(int client_fd) {
 static unsigned
 greeting(struct selector_key* key) {
 
-    admin * admin = ATTACHMENT(key);
+    admin * admin = ADMIN_ATTACHMENT(key);
     size_t greeting_size;
     buffer * buff = &admin->write_buffer;
     size_t buff_size;
@@ -197,7 +197,7 @@ greeting(struct selector_key* key) {
 static unsigned
 pass_auth(struct selector_key* key, bool number) {
 
-    admin * admin = ATTACHMENT(key);
+    admin * admin = ADMIN_ATTACHMENT(key);
     size_t auth_error_size;
     buffer * buff = &admin->write_buffer;
     size_t buff_size;
@@ -224,11 +224,11 @@ static unsigned
 greet(struct selector_key* key) {
     int status = greeting(key);
     if (status < 0) {
-        ATTACHMENT(key)->state = AERROR;
+        ADMIN_ATTACHMENT(key)->state = AERROR;
         return AERROR;
     }
-    selector_set_interest(key->s, ATTACHMENT(key)->client_fd, OP_READ);
-    ATTACHMENT(key)->state = AUTH;
+    selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_READ);
+    ADMIN_ATTACHMENT(key)->state = AUTH;
     return AUTH;
 }
 
@@ -236,21 +236,21 @@ static unsigned
 authenticate(struct selector_key * key) {
     size_t size;
     int status;
-    buffer * buff = &ATTACHMENT(key)->read_buffer;
+    buffer * buff = &ADMIN_ATTACHMENT(key)->read_buffer;
     char * login_key = "password";
     int bytes = recieve_from_client(key);
     if(bytes < 0) {
         return AERROR;
     }
-    selector_set_interest(key->s, ATTACHMENT(key)->client_fd, OP_READ);
+    selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_READ);
     uint8_t * ptr = buffer_read_ptr(buff,&size);
-    if(strncmp(login_key, ptr, strlen(login_key)) == 0) {
+    if(strncmp(login_key, (const char *)ptr, strlen(login_key)) == 0) {
         status = pass_auth(key,1);
         if (status < 0) {
             return AERROR;
         }
         buffer_read_adv(buff,bytes);
-        ATTACHMENT(key)->state = COMMANDS;
+        ADMIN_ATTACHMENT(key)->state = COMMANDS;
         return COMMANDS;
     } else {
         status = pass_auth(key,0);
@@ -267,12 +267,12 @@ authenticate(struct selector_key * key) {
 static unsigned
 command_response(struct selector_key * key) {
     int status;
-    admin * admin = ATTACHMENT(key);
+    admin * admin = ADMIN_ATTACHMENT(key);
     status = send_to_client(key);
     if(status < 0) {
         return AERROR;
     }
-    selector_set_interest(key->s, ATTACHMENT(key)->client_fd, OP_READ);
+    selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_READ);
     return admin->state;
 }
 
@@ -280,14 +280,14 @@ command_response(struct selector_key * key) {
 static unsigned
 send_to_client(struct selector_key * key) {
 
-    admin * admin = ATTACHMENT(key);
+    admin * admin = ADMIN_ATTACHMENT(key);
     buffer * buff = &admin->write_buffer;
     size_t size;
     int n;
     uint8_t * ptr = buffer_read_ptr(buff, &size);
      if(n = sctp_sendmsg(key->fd, ptr , size,
                                NULL, 0, 0, 0, 0, 0, 0) < 0) {
-         log(ERRORR, "Error sending message to client");
+         log(ERRORR, "%s\n", "Error sending message to client");
          return -1;
      }
     buffer_read_adv(buff, size);
@@ -296,7 +296,7 @@ send_to_client(struct selector_key * key) {
 
 static unsigned
 recieve_from_client(struct selector_key * key) {
-    admin * admin = ATTACHMENT(key);
+    admin * admin = ADMIN_ATTACHMENT(key);
     buffer * buff = &admin->read_buffer;
     size_t size;
     int n;
@@ -316,7 +316,7 @@ static unsigned
 parse_command(struct selector_key * key) {
 
     char buf[2048] = {0};
-    admin *admin = ATTACHMENT(key);
+    admin *admin = ADMIN_ATTACHMENT(key);
     buffer *buff = &admin->read_buffer;
     int bytes = recieve_from_client(key);
     if (bytes < 0) {
@@ -330,7 +330,7 @@ parse_command(struct selector_key * key) {
     ptr = buffer_write_ptr(buff, &size);
     char *message;
     struct opt * opt;
-    selector_set_interest(key->s, ATTACHMENT(key)->client_fd, OP_WRITE);
+    selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_WRITE);
     int flag = 0;
 
     switch (comando) {
@@ -348,7 +348,7 @@ parse_command(struct selector_key * key) {
             admin->state = COMMANDS;
             break;
 
-        case LOGOUT:
+        case ADMIN_CLOSE_CONNECTION:
 
             message = "+3 \n";
             memcpy(ptr, message, strlen(message));
@@ -364,11 +364,9 @@ parse_command(struct selector_key * key) {
             break;
         case DELETE_USER:
             break;
-        case LIST_USER:
+        case LIST_USERS:
             break;
         case USER_ACCESS_HISTORY:
-            break;
-        case ADMIN_CLOSE_CONNECTION:
             break;
         default:
             message = "-ERR\n";

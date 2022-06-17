@@ -15,6 +15,9 @@ struct metrics {
 metrics_t
 init_metrics(void);
 
+
+char * get_stats(void);
+
 void
 free_metrics(metrics_t metrics);
 

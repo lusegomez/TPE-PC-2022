@@ -21,14 +21,6 @@
 #include "./utils/includes/metrics.h"
 
 struct socks5 * pool = NULL;
-static metrics_t metrics;
-
-char * get_stats(void)
-{
-    char to_ret[100];
-    sprintf(to_ret, "+Total connections: %lu\nConcurrent connections: %lu\nTotal bytes transferred: %lu\n", metrics->total_connections, metrics->concurrent_connections, metrics->bytes_transfered);
-    return to_ret;
-}
 
 const struct state_definition states_definition[] = {
         {

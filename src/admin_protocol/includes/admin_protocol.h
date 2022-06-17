@@ -1,12 +1,12 @@
 #ifndef ADMIN_PROTOCOL_H
 #define ADMIN_PROTOCOL_H
 
-#include "../../includes/selector.h"
+
 #include "../../includes/buffer.h"
 #include "../../includes/stm.h"
 #include "../../includes/args.h"
 #include "../../utils/includes/logger.h"
-#include "../../includes/socks5.h"
+#include "../../utils/includes/metrics.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -27,19 +27,19 @@
 #include <ctype.h> // para toupper
 
 #define N(x)                (sizeof(x)/sizeof((x)[0]))
-#define ATTACHMENT(key)     ( ( struct admin * )(key)->data)
+#define ADMIN_ATTACHMENT(key)     ( ( struct admin * )(key)->data)
 
 typedef enum command_parser_states
 {
     STATS=2,
-    LOGOUT,
+    ADMIN_CLOSE_CONNECTION,
     DISECTOR_ACTIVATION, //tiene args
     DISECTOR_DATA,
     ADD_USER, //tiene args
     DELETE_USER, //tiene args
     LIST_USERS,
     USER_ACCESS_HISTORY, //tiene args
-    ADMIN_CLOSE_CONNECTION
+
 } command_parser_states;
 
 
