@@ -68,6 +68,7 @@ unsigned hello_read(struct selector_key * key) {
     ssize_t ret = recv(key->fd, pointer, nbytes, 0);
 
     if(ret > 0) {
+        add_bytes(ret);
         buffer_write_adv(&sock->read_buffer, ret);
         enum hello_state state = consume_hello(&sock->read_buffer, hp);
         if(state == hello_end){
@@ -136,6 +137,7 @@ unsigned hello_write(struct selector_key * key) {
     uint8_t ret_state = HELLO;
     ssize_t ret = send(key->fd, pointer, n, MSG_NOSIGNAL);
     if(ret > 0) {
+        add_bytes(ret);
         buffer_read_adv(&sock->write_buffer, n);
         if(!buffer_can_read(&sock->write_buffer)){
             if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){

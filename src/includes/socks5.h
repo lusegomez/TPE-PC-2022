@@ -11,6 +11,7 @@
 #include "../utils/includes/connect.h"
 #include "../state_machines/includes/dns_query_st.h"
 #include "../state_machines/includes/copy_st.h"
+#include "../utils/includes/metrics.h"
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)

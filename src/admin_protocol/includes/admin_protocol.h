@@ -7,6 +7,7 @@
 #include "../../includes/args.h"
 #include "../../utils/includes/logger.h"
 #include "../../utils/includes/metrics.h"
+#include "../../utils/includes/users.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
