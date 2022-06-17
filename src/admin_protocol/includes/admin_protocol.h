@@ -6,6 +6,7 @@
 #include "../../includes/stm.h"
 #include "../../includes/args.h"
 #include "../../utils/includes/logger.h"
+#include "../../includes/socks5.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,10 +31,15 @@
 
 typedef enum command_parser_states
 {
-    STATS = 0,
-    GETCMD,
-    SETCMD,
+    STATS=2,
     LOGOUT,
+    DISECTOR_ACTIVATION, //tiene args
+    DISECTOR_DATA,
+    ADD_USER, //tiene args
+    DELETE_USER, //tiene args
+    LIST_USERS,
+    USER_ACCESS_HISTORY, //tiene args
+    ADMIN_CLOSE_CONNECTION
 } command_parser_states;
 
 

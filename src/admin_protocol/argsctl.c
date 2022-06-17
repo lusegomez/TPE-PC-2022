@@ -15,7 +15,7 @@
 void
 admin_usage() {
     printf(
-            "pop3ctl [-h] [-L <management-address>] [-o <management-port>]\n"
+            "socks5ctl [-h] [-L <management-address>] [-P <management-port>]\n"
     );
 }
 
@@ -23,7 +23,7 @@ void
 help_admin() {
     printf(
             "USAGE\n"
-            "    pop3ctl [OPTIONS]\n"
+            "    socks5ctl [OPTIONS]\n"
             "\n"
             "ARGUMENTS\n"
             "-h\n"
@@ -33,9 +33,9 @@ help_admin() {
             "    Specifies address where management server is listening.\n"
             "    Default using loopback\n"
             "\n"
-            "-o <management-port>\n"
+            "-P <management-port>\n"
             "    Specifies port where management server is listening.\n"
-            "    Default is 9090\n"
+            "    Default is 8080\n"
             "\n"
     );
 
@@ -62,7 +62,7 @@ parse_admin_options(int argc, char **argv, struct admin_opt * opt) {
     /* Setting default values  */
     assert(argv && opt);
     memset(opt, 0, sizeof(*opt));
-    opt->mgmt_port    = 9090;     /* TODO:default value */
+    opt->mgmt_port    = 8080;     /* TODO:default value */
     opt->mgmt_addr    = "127.0.0.1";
 
     /* Parse command line arguments */
@@ -73,7 +73,7 @@ parse_admin_options(int argc, char **argv, struct admin_opt * opt) {
             case 'h':
                 help_admin();
                 break;
-            case 'o':
+            case 'P':
                 opt->mgmt_port = port(optarg);
                 break;
             case 'L':

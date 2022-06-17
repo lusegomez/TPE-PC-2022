@@ -56,6 +56,8 @@ struct socks5 {
 
 };
 
+char * get_stats(void);
+
 void socksv5_passive_accept(struct selector_key * key);
 
 

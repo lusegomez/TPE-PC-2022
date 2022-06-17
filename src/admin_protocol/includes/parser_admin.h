@@ -1,7 +1,6 @@
 #ifndef PARSER_ADMIN_H
 #define PARSER_ADMIN_H
 
-#include "socket_admin.h"
 
 bool
 requests(bool * logged, char request[BUFFER_MAX], int request_length, char response[BUFFER_MAX], int * response_length, metrics_t metrics)

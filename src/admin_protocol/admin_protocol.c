@@ -310,6 +310,8 @@ recieve_from_client(struct selector_key * key) {
 
 }
 
+
+
 static unsigned
 parse_command(struct selector_key * key) {
 
@@ -337,23 +339,44 @@ parse_command(struct selector_key * key) {
 
             message = get_stats();
             if(message == NULL) {
-                message = "-ERR\n";
+                message = "-2 \n";
                 memcpy(ptr, message, strlen(message));
             } else {
                 memcpy(ptr, message, strlen(message));
             }
             buffer_write_adv(buff, strlen(message));
             admin->state = COMMANDS;
-            free(message);
             break;
 
         case LOGOUT:
 
-            message = "+OK\n";
+            message = "+3 \n";
             memcpy(ptr, message, strlen(message));
             buffer_write_adv(buff, strlen(message));
             admin->state = ADONE;
             break;
+
+        case DISECTOR_ACTIVATION:
+            break;
+        case DISECTOR_DATA:
+            break;
+        case ADD_USER:
+            break;
+        case DELETE_USER:
+            break;
+        case LIST_USER:
+            break;
+        case USER_ACCESS_HISTORY:
+            break;
+        case ADMIN_CLOSE_CONNECTION:
+            break;
+        default:
+            message = "-ERR\n";
+            memcpy(ptr, message, strlen(message));
+            buffer_write_adv(buff, strlen(message));
+            admin->state = COMMANDS;
+            break;
+
     }
 
     return COMMANDS;
