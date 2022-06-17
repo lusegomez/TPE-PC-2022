@@ -58,16 +58,26 @@ main(const int argc, const char **argv) {
     //TODO:Set ipv4/ipv6
     int passive_socket_ipv4 = -1;
     int passive_socket_ipv6 = -1;
+    int passive_socket_mngt_ipv4 = -1;
+    int passive_socket_mngt_ipv6 = -1;
 
-    int errorIPv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
-    if(errorIPv4 == -1) {
+    int error_ipv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
+    if(error_ipv4 == -1) {
         printf("Error al crear socket IPv4 \n");
     }
-    int errorIPv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
-    if(errorIPv6 == -1) {
+    int error_ipv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
+    if(error_ipv6 == -1) {
         printf("Error al crear socket IPv6 \n");
     }
-    if (errorIPv4 == -1 && errorIPv6 == -1)
+    int error_mngt_ipv4 = create_passive_socket_mngt_ipv4(&passive_socket_mngt_ipv4, args);
+    if(error_mngt_ipv4 == -1){
+        printf("Error al crear socket SCTP IPv4");
+    }
+    int error_mngt_ipv6 = create_passive_socket_mngt_ipv6(&passive_socket_mngt_ipv6, args);
+    if(error_mngt_ipv6 == -1){
+        printf("Error al crear socket SCTP IPv6");
+    }
+    if ((error_ipv4 == -1 && error_ipv6 == -1) || (error_mngt_ipv4 == -1 && error_mngt_ipv6 == -1))
     {
         goto finally;
     }
@@ -136,6 +146,8 @@ main(const int argc, const char **argv) {
 
     bool ipv4_flag = false;
     bool ipv6_flag = false;
+    bool ipv4_mngt_flag = false;
+    bool ipv6_mngt_flag = false;
     if(passive_socket_ipv4 != -1){
         ss = selector_register(selector, passive_socket_ipv4, &socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
@@ -150,16 +162,24 @@ main(const int argc, const char **argv) {
             err_msg = "Error registering IPv6 Socket";
         }
     }
-
-    if(ipv4_flag && ipv6_flag) goto finally;
-    /*
-    ss = selector_register(selector, server, &socksv5,
-                                              OP_READ, NULL);
-    if(ss != SELECTOR_SUCCESS) {
-        err_msg = "registering fd";
-        goto finally;
+    if(passive_socket_mngt_ipv4 != -1){
+        ss = selector_register(selector, passive_socket_mngt_ipv4, &socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv4_mngt_flag = true;
+            err_msg = "Error registering IPv4 Management Socket";
+        }
     }
-    */
+    if(passive_socket_mngt_ipv6 != -1){
+        ss = selector_register(selector, passive_socket_mngt_ipv6, &socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv6_mngt_flag = true;
+            err_msg = "Error registering IPv6 Management Socket";
+        }
+    }
+
+
+    if((ipv4_flag && ipv6_flag) || (ipv4_mngt_flag && ipv6_mngt_flag)) goto finally;
+  
     for(;!done;) {
         err_msg = NULL;
         ss = selector_select(selector);
