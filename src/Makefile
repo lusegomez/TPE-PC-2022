@@ -4,7 +4,7 @@ LDFLAGS = -lpthread -pthread
 SCTPFLAGS = -lsctp
 all: main admin
 clean:
-	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d ./utils/*.o ./admin_protocol/*.o
+	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d socks5dctl ./utils/*.o ./admin_protocol/*.o
 
 COMMON = buffer.o utils/logger.o utils/util.o utils/metrics.o
 DEP = selector.o stm.o parser.o parser_utils.o
