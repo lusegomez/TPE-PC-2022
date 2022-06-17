@@ -1,0 +1,46 @@
+.\" Macros
+.ds PX \s-1POSIX\s+1
+.de EXAMPLE .\" Format de los ejemplos
+.RS 10
+.BR "\\$1"
+.RE
+..
+
+.TH socks5dctl 0.0.0 "17 de junio 2022"
+.LO 8
+.SH NAME
+socks5dclt \- cliente del protocolo para el monitoreo del proxy SOCKS version 5 con esteroides
+
+.SH SINOPSIS
+.HP 10
+.B  socks5dctl
+
+.SH OPCIONES
+
+.IP "\fBHELP\fR"
+Imprime la lista de comandos del cliente.
+
+.IP "\fBSTATS\fR"
+Imprime las estadisticas almacenadas en el proxy
+
+.IP "\fBCLOSE_CONNECTION\fR"
+Cierra la conexion del cliente.
+
+.IP "\fBDISECTOR_ACTIVATION\fB \fIopcion\fR"
+Activa el disector si la opcion es '+'. Lo desactiva si es un '-'.
+
+.IP "\fBDISECTOR_DATA\fR"
+Imprime si el disector esta activado.
+
+.IP "\fBADD_USER\fB \fI<user:password>\fR"
+Agrega el usuario que recibe como argumento.
+
+.IP "\fBDELETE_USER\fB \fI<user>\fR"
+Elimina el usuario que recibe como argumento.
+
+.IP "\fBLIST_USER\fR"
+Imprime la lista de usuarios almacenados en el proxy.
+
+.IP "\fBUSER_ACCESS_HISTORY\fB \fI<user>\fR"
+Imprime la lista de conexiones del usuario que recibe como parametro.
+
