@@ -93,17 +93,13 @@ command_response(struct selector_key * key);
 struct admin *
 new_admin(int client_fd);
 
-static void
-admin_read   (struct selector_key *key);
+void admin_read   (struct selector_key *key);
 
-static void
-admin_write  (struct selector_key *key);
+void admin_write  (struct selector_key *key);
 
-static void
-admin_block  (struct selector_key *key);
+void admin_block  (struct selector_key *key);
 
-static void
-admin_close  (struct selector_key *key);
+void admin_close  (struct selector_key *key);
 
 static void
 admin_done  (struct selector_key *key);
@@ -118,5 +114,6 @@ static const struct fd_handler admin_handler = {
         .handle_block  = admin_block
 };
 
+void admin_connection(struct selector_key * key);
 
 #endif

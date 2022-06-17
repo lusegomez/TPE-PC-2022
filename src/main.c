@@ -27,6 +27,7 @@
 #include "./includes/passive_sockets.h"
 #include "./includes/args.h"
 #include "./utils/includes/users.h"
+#include "./admin_protocol/includes/admin_protocol.h"
 
 #define N(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -143,7 +144,11 @@ main(const int argc, const char **argv) {
         .handle_write      = NULL,
         .handle_close      = NULL,
     };
-
+    const struct fd_handler mngt_socksv5 = {
+        .handle_read = admin_connection,
+        .handle_write = NULL,
+        .handle_close = NULL,
+    };
     bool ipv4_flag = false;
     bool ipv6_flag = false;
     bool ipv4_mngt_flag = false;
@@ -163,14 +168,14 @@ main(const int argc, const char **argv) {
         }
     }
     if(passive_socket_mngt_ipv4 != -1){
-        ss = selector_register(selector, passive_socket_mngt_ipv4, &socksv5, OP_READ, NULL);
+        ss = selector_register(selector, passive_socket_mngt_ipv4, &mngt_socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv4_mngt_flag = true;
             err_msg = "Error registering IPv4 Management Socket";
         }
     }
     if(passive_socket_mngt_ipv6 != -1){
-        ss = selector_register(selector, passive_socket_mngt_ipv6, &socksv5, OP_READ, NULL);
+        ss = selector_register(selector, passive_socket_mngt_ipv6, &mngt_socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv6_mngt_flag = true;
             err_msg = "Error registering IPv6 Management Socket";
@@ -215,7 +220,12 @@ finally:
     if (passive_socket_ipv6 != -1) {
         close(passive_socket_ipv6);
     }
-    
+    if (passive_socket_mngt_ipv4 != -1) {
+        close(passive_socket_mngt_ipv4);
+    }
+    if (passive_socket_mngt_ipv6 != -1) {
+        close(passive_socket_mngt_ipv6);
+    }
     socksv5_pool_destroy();
 /*
     close(server);

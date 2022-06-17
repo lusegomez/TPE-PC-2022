@@ -1,7 +1,7 @@
 .PHONY=clean all
 CFLAGS = --std=c11 -pedantic -pedantic-errors -g -Wall -Wextra -Wno-unused-parameter -Wno-implicit-fallthrough -D_POSIX_C_SOURCE=200112L -fsanitize=address
 LDFLAGS = -lpthread -pthread
-SCTPFLAG = -lsctp
+SCTPFLAGS = -lsctp
 all: main admin
 clean:
 	- rm -f *.o ./state_machines/*.o ./parsers/*.o socks5d ./utils/*.o ./admin_protocol/*.o
@@ -39,7 +39,7 @@ admin_protocol/admin_protocol.o: admin_protocol/includes/admin_protocol.h
 admin_protocol/argsctl.o: admin_protocol/includes/argsctl.h
 
 
-main: $(SERVER_SOURCES) $(DEP) $(STATES) $(PARSERS) $(COMMON)
-	$(CC) $(CFLAGS) $(SCTPFLAG) $(LDFLAGS) -o socks5d $(SERVER_SOURCES) $(DEP) $(STATES) $(PARSERS) $(COMMON)
+main: $(SERVER_SOURCES) $(DEP) $(STATES) $(PARSERS) $(COMMON) 
+	$(CC) $(CFLAGS) $(SCTPFLAGS) $(LDFLAGS) -o socks5d $(SERVER_SOURCES) $(DEP) $(STATES) $(PARSERS) $(COMMON) 
 admin: $(ADMIN_SOURCES) $(DEP) $(COMMON)
-	$(CC) $(CFLAGS) $(SCTPFLAG) -o socks5dctl $(ADMIN_SOURCES) $(DEP) $(COMMON)
+	$(CC) $(CFLAGS) $(SCTPFLAGS) $(LDFLAGS) -o socks5dctl $(ADMIN_SOURCES) $(DEP) $(COMMON)

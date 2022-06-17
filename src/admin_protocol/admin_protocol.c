@@ -7,6 +7,7 @@ static const struct state_definition client_statbl[] =
         {
                 .state          = GREETING,
                 .on_write_ready = greet,
+                .on_read_ready = greet
 
         },
         {
@@ -29,6 +30,8 @@ static const struct state_definition client_statbl[] =
         }
 };
 
+
+
 static const struct state_definition *
 admin_describe_states(void)
 {
@@ -36,8 +39,7 @@ admin_describe_states(void)
 }
 
 
-static void
-admin_read(struct selector_key *key) {
+void admin_read(struct selector_key *key) {
     struct state_machine *stm = &ADMIN_ATTACHMENT(key)->stm;
     const enum admin_states st = stm_handler_read(stm,key);
 
@@ -46,8 +48,7 @@ admin_read(struct selector_key *key) {
     }
 }
 
-static void
-admin_write(struct selector_key *key) {
+void admin_write(struct selector_key *key) {
     struct state_machine *stm = &ADMIN_ATTACHMENT(key)->stm;
     const enum admin_states st = stm_handler_write(stm,key);
 
@@ -56,8 +57,7 @@ admin_write(struct selector_key *key) {
     }
 }
 
-static void 
-admin_block(struct selector_key *key) {
+void admin_block(struct selector_key *key) {
   //NOTHING TO DO HERE
 }
 
@@ -84,8 +84,7 @@ admin_destroy(struct admin * admin) {
 }
 
 
-static void
-admin_close(struct selector_key *key) {
+void admin_close(struct selector_key *key) {
     admin_destroy(ADMIN_ATTACHMENT(key));
 }
 
