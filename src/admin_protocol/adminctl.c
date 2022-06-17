@@ -16,9 +16,15 @@
 
 #include "includes/argsctl.h"
 
-#define STATSC 0
-#define LOGOUTC 1
-#define HELPC    2
+#define STATSC 2
+#define LOGOUTC 3
+#define DISECTOR_ACTIVATION 4
+#define DISECTOR_DATA 5
+#define ADD_USER 6
+#define DELETE_USER 7
+#define LIST_USERS 8
+#define USER_ACCESS_HISTORY 9
+#define HELPC    10
 
 typedef enum command_parser_states
 {
@@ -46,15 +52,15 @@ typedef enum command_parser_states
 } command_parser_states;
 
 char * help_message = "These are all available commmands:\n"
-                      "STATS\t\tPrints useful statistics about the proxy server\n"
+                      "STATS\t\t\t\tPrints useful statistics about the proxy server\n"
                       "CLOSE_CONNECTION\t\tDisconnects admin client\n"
                       "DISECTOR_ACTIVATION\t\tActivates or deactivates the disector\n"
                       "DISECTOR_DATA\t\t\tGets data from the disector\n"
-                      "ADD_USER <user:pass>\t\t\tAdds a new user to the system\n"
-                      "DELETE_USER <user>\t\t\tDeletes a user from the system\n"
+                      "ADD_USER <user:pass>\t\tAdds a new user to the system\n"
+                      "DELETE_USER <user>\t\tDeletes a user from the system\n"
                       "LIST_USERS\t\t\tLists all users in the system\n"
-                      "USER_ACCESS_HISTORY <user>\t\tGets the access history of a user\n"
-                      "HELP\t\tPrints this message\n";
+                      "USER_ACCESS_HISTORY <user>\tGets the access history of a user\n"
+                      "HELP\t\t\t\tPrints this message\n";
 
 static unsigned
 parse_command(int sock, char * in_buff, char * out_buffer) {

@@ -38,7 +38,8 @@ typedef enum command_parser_states
     ADD_USER, //tiene args
     DELETE_USER, //tiene args
     LIST_USERS,
-    USER_ACCESS_HISTORY, //tiene args
+    USER_ACCESS_HISTORY,//tiene args
+
 
 } command_parser_states;
 

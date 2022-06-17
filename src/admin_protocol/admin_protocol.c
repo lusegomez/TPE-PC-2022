@@ -6,8 +6,7 @@ static const struct state_definition client_statbl[] =
         {
         {
                 .state          = GREETING,
-                .on_write_ready = greet,
-                .on_read_ready = greet
+                .on_write_ready = greet
 
         },
         {
