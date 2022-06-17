@@ -181,7 +181,7 @@ greeting(struct selector_key* key) {
     buffer * buff = &admin->write_buffer;
     size_t buff_size;
 
-    char * greeting = "+Greetings\n";
+    char * greeting = "+0 \n";
     greeting_size = strlen(greeting);
 
     uint8_t  * ptr = buffer_write_ptr(buff, &buff_size);
@@ -201,14 +201,14 @@ pass_auth(struct selector_key* key, bool number) {
     size_t buff_size;
     int n;
     if (number == 0) {
-        char *auth_error = "-ERR\n";
+        char *auth_error = "-1 \n";
         auth_error_size = strlen(auth_error);
         uint8_t *ptr = buffer_write_ptr(buff, &buff_size);
         memcpy(ptr, auth_error, auth_error_size);
         buffer_write_adv(buff, auth_error_size);
         n = send_to_client(key);
     } else {
-        char *auth_error = "+OK\n";
+        char *auth_error = "+1 \n";
         auth_error_size = strlen(auth_error);
         uint8_t *ptr = buffer_write_ptr(buff, &buff_size);
         memcpy(ptr, auth_error, auth_error_size);
@@ -322,20 +322,48 @@ parse_command(struct selector_key * key) {
     }
     size_t size;
     uint8_t *ptr = buffer_read_ptr(buff, &size);
-    int comando = *ptr - '0';
-    buffer_read_adv(buff, 1);
+    ptr[size - 1] = '\0';
+    char * token = strtok((char *)ptr, " ");
+    int comando = atoi(token);
+    char * arg = strtok(NULL, " ");
+    bool valid = true;
+    if(comando == DISECTOR_ACTIVATION || comando == ADD_USER || comando == DELETE_USER || comando == USER_ACCESS_HISTORY){
+        if (arg != NULL) {
+            if(strtok(NULL, " ")) {
+                valid = false;
+                return -1;
+            }
+        }
+    } else {
+        if(strtok(NULL, " ")) {
+            valid = false;
+            return -1;
+        }
+    }
+    selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_WRITE);
+//    buffer_read_adv(buff, 1);
     buff = &admin->write_buffer;
     ptr = buffer_write_ptr(buff, &size);
-    char *message;
-    struct opt * opt;
-    selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_WRITE);
-    int flag = 0;
+    if(!valid) {
+        *ptr = '-';
+        buffer_write_adv(buff, 1);
+        *ptr = comando + '0';
+        buffer_write_adv(buff, 1);
+        *ptr = ' ';
+        buffer_write_adv(buff, 1);
+        *ptr = '\n';
+        buffer_write_adv(buff, 1);
+        admin->state = COMMANDS;
+        return COMMANDS;
+    }
+    char *message = malloc(255);
+    bool disector_ret;
 
     switch (comando) {
 
         case STATS:
 
-            message = get_stats();
+            get_stats(message);
             if(message == NULL) {
                 message = "-2 \n";
                 memcpy(ptr, message, strlen(message));
@@ -355,6 +383,17 @@ parse_command(struct selector_key * key) {
             break;
 
         case DISECTOR_ACTIVATION:
+            message = "+4 \n";
+            if(*arg == '+'){
+                disector_ret = disector_activation(true);
+            } else if(*arg == '-') {
+                disector_ret = disector_activation(false);
+            } else {
+                message = "-4 \n";
+            }
+            memcpy(ptr, message, strlen(message));
+            buffer_write_adv(buff, strlen(message));
+            admin->state = COMMANDS;
             break;
         case DISECTOR_DATA:
             break;
@@ -374,6 +413,6 @@ parse_command(struct selector_key * key) {
             break;
 
     }
-
+    free(message);
     return COMMANDS;
 }

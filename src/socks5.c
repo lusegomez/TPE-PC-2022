@@ -18,7 +18,6 @@
 #include "./includes/socks5_states.h"
 #include "./includes/parser.h"
 #include "./utils/includes/logger.h"
-#include "./utils/includes/metrics.h"
 
 struct socks5 * pool = NULL;
 
@@ -109,7 +108,7 @@ static struct socks5 * create_new_sock5(int client_fd) {
     buffer_init(&sock->read_buffer, BUFFER_SIZE, sock->read_raw_buff);
     buffer_init(&sock->write_buffer, BUFFER_SIZE, sock->write_raw_buff);
 
-
+    add_concurrent();
     sock->references = 1;
 finally:
     return sock;
@@ -147,6 +146,7 @@ destroy_socks5(struct selector_key *key) {
         }
         close(sock->origin_fd);
     }
+    remove_concurrent();
     remove_sock(sock);
 
 }

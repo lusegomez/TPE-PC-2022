@@ -25,235 +25,127 @@
 #define LIST_USERS 8
 #define USER_ACCESS_HISTORY 9
 #define HELPC    10
+int totalCommands = 9;
+char * commands[] = {
+        "help",
+        "stats",
+        "logout",
+        "disector_activation",
+        "disector_data",
+        "add_user",
+        "delete_user",
+        "list_users",
+        "user_access_history",
+};
 
-typedef enum command_parser_states
-{
-    BEGIN = 20,
-    L,
-    LO,
-    LOG,
-    LOGI,
-    LOGIN,
-    H,
-    HE,
-    HEL,
-    HELP,
-    S,
-    ST,
-    STA,
-    STAT,
-    STATS,
-    LOGO,
-    LOGOU,
-    LOGOUT,
-    ARGUMENTS,
-    INVALID,
-    CDONE,
-} command_parser_states;
+static int isCommand(char * name){
+    for (int i = 0; i < totalCommands; i++) {
+        if (!strcmp(commands[i],name)){
+            return i;
+        }
+    }
+    return -1;
+}
 
 char * help_message = "These are all available commmands:\n"
-                      "STATS\t\t\t\tPrints useful statistics about the proxy server\n"
-                      "CLOSE_CONNECTION\t\tDisconnects admin client\n"
-                      "DISECTOR_ACTIVATION\t\tActivates or deactivates the disector\n"
-                      "DISECTOR_DATA\t\t\tGets data from the disector\n"
-                      "ADD_USER <user:pass>\t\tAdds a new user to the system\n"
-                      "DELETE_USER <user>\t\tDeletes a user from the system\n"
-                      "LIST_USERS\t\t\tLists all users in the system\n"
-                      "USER_ACCESS_HISTORY <user>\tGets the access history of a user\n"
-                      "HELP\t\t\t\tPrints this message\n";
+                      "STATS\n\tPrints useful statistics about the proxy server\n"
+                      "CLOSE_CONNECTION\n\tDisconnects admin client\n"
+                      "DISECTOR_ACTIVATION\n\tActivates or deactivates the disector\n"
+                      "DISECTOR_DATA\n\tGets data from the disector\n"
+                      "ADD_USER <user:pass>\n\tAdds a new user to the system\n"
+                      "DELETE_USER <user>\n\tDeletes a user from the system\n"
+                      "LIST_USERS\n\tLists all users in the system\n"
+                      "USER_ACCESS_HISTORY <user>\n\tGets the access history of a user\n"
+                      "HELP\n\tPrints this message\n";
 
-static unsigned
+static int
 parse_command(int sock, char * in_buff, char * out_buffer) {
     memset(out_buffer, 0, BUFF_SIZE);
     memset(in_buff, 0, BUFF_SIZE);
     fgets(out_buffer, BUFF_SIZE, stdin);
-//    strtok(out_buffer, "\n");
     if (strlen(out_buffer) < 0) {
         return -1;
     }
-    char c = toupper(out_buffer[0]);
-    command_parser_states state = BEGIN;
-    int command = -1;
     char args[100] = {0};
-    int args_index = 0;
-    int i = 0;
-    while (state != INVALID && out_buffer[i] != 0) {
-        switch (state) {
-            case BEGIN:
-                if (c == 'L') {
-                    state = L;
-                } else if (c == 'S') {
-                    state = S;
-                } else if (c == 'H') {
-                    state = H;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case L:
-                if (c == 'O') {
-                    state = LO;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case LO:
-                if (c == 'G') {
-                    state = LOG;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case LOG:
-                if (c == 'O') {
-                    state = LOGO;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case LOGO:
-                if (c == 'U') {
-                    state = LOGOU;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case LOGOU:
-                if (c == 'T') {
-                    state = LOGOUT;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case LOGOUT:
-                if (c == '\n') { //TODO: ver si tengo que hacer para \r\n tambien o solo \n
-                    state = CDONE;
-                    command = LOGOUTC;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case S:
-                if (c == 'T') {
-                    state = ST;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case ST:
-                if (c == 'A') {
-                    state = STA;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case STA:
-                if (c == 'T') {
-                    state = STAT;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case STAT:
-                if (c == 'S') {
-                    state = STATS;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case STATS:
-                if (c == '\n') {
-                    state = CDONE;
-                    command = STATSC;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case H:
-                if(c == 'E') {
-                    state = HE;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case HE:
-                if(c == 'L') {
-                    state = HEL;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case HEL:
-                if(c == 'P') {
-                    state = HELP;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case HELP:
-                if(c == '\n') {
-                    state = CDONE;
-                    command = HELPC;
-                } else {
-                    state = INVALID;
-                }
-                break;
-            case ARGUMENTS:
-                if (c != '\n') {
-                    args[args_index++] = out_buffer[i];
-                } else {
-                    state = CDONE;
-                }
-                break;
-
-            case CDONE:
-                break;
-        }
-        c = toupper(out_buffer[++i]);
+    out_buffer[strlen(out_buffer) - 1] = '\0';
+    char * token = strtok(out_buffer, " ");
+    char * command = token;
+    while (*token){
+        *token = tolower(*token);
+        token++;
     }
-
-    int n;
-    if (state == INVALID) {
+    int command_index = isCommand(command);
+    if(command_index == -1) {
+        printf("-Err \n");
         printf("Invalid command!\n");
         return -1;
     } else {
-        memset(out_buffer, 0, BUFF_SIZE);
-        memset(in_buff, 0, BUFF_SIZE);
-        sprintf(out_buffer, "%d", command);
-        if(strlen(args) > 0) {
-            strcat(out_buffer, args);
+        command_index += 1;
+    }
+    char * arg = NULL;
+    if(command_index == 4 || command_index == 6 || command_index == 7 || command_index == 9){
+        arg = strtok(NULL, " ");
+        if (arg != NULL) {
+            if(strtok(NULL, " ")) {
+                printf("-Err \n");
+                printf("Too many arguments!\n");
+                return -1;
+            }
         }
-        n = sctp_sendmsg(sock, out_buffer, strlen(out_buffer), NULL, 0,0,0,0,0,0);
-        if(n < 0) {
-            printf("Error sending command!\n");
+    } else if( command_index == 1){
+        printf(help_message);
+        return 1;
+    } else {
+        if(strtok(NULL, " ")) {
+            printf("-Err \n");
+            printf("Too many arguments!\n");
             return -1;
-        }
-        n = sctp_recvmsg(sock,in_buff, BUFF_SIZE, NULL, 0,0,0);
-        if(n < 0) {
-            printf("Error receiving response!\n");
-            return -1;
-        }
-
-        switch (command) {
-            case STATSC:
-                if(in_buff[0] == '+') {
-                    printf(in_buff+1);
-                } else if (in_buff[0] == '-') {
-                    printf("Failed to get stats\n");
-                }
-                break;
-            case LOGOUTC:
-                if(in_buff[0] == '+') {
-                    printf("Logging out...\n");
-                } else if (in_buff[0] == '-') {
-                    printf("Failed to log out\n");
-                }
-                break;
-            case HELPC:
-                printf(help_message);
-                break;
         }
     }
+
+
+    int n;
+
+    memset(out_buffer, 0, BUFF_SIZE);
+    memset(in_buff, 0, BUFF_SIZE);
+    sprintf(out_buffer, "%d ", command_index);
+    if(arg != NULL){
+        strcat(out_buffer, arg);
+    }
+    strcat(out_buffer, "\n");
+    n = sctp_sendmsg(sock, out_buffer, strlen(out_buffer), NULL, 0,0,0,0,0,0);
+    if(n < 0) {
+        printf("Error sending command!\n");
+        return -1;
+    }
+    n = sctp_recvmsg(sock,in_buff, BUFF_SIZE, NULL, 0,0,0);
+    if(n < 0) {
+        printf("Error receiving response!\n");
+        return -1;
+    } else {
+        printf("%s", in_buff);
+    }
+
+//    switch (command) {
+//        case STATSC:
+//            if(in_buff[0] == '+') {
+//                printf(in_buff+1);
+//            } else if (in_buff[0] == '-') {
+//                printf("Failed to get stats\n");
+//            }
+//            break;
+//        case LOGOUTC:
+//            if(in_buff[0] == '+') {
+//                printf("Logging out...\n");
+//            } else if (in_buff[0] == '-') {
+//                printf("Failed to log out\n");
+//            }
+//            break;
+//        case HELPC:
+//            printf(help_message);
+//            break;
+//    }
+
     return 1;
 }
 
@@ -277,11 +169,11 @@ get_authentication(int sock,char * in_buffer,char * out_buffer) {
     }
     if (in_buffer[0] == '+') {
         //printf(in_buffer);
-        printf("Welcome Administrator!\n");
+        printf("%sWelcome Administrator!\n", in_buffer);
         return  1;
     } else {
         //printf(in_buffer);
-        printf("Wrong Password, Try Again\n");
+        printf("%sWrong Password, Try Again\n", in_buffer);
         return 0;
     }
 }
@@ -310,12 +202,16 @@ main(const int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     int n = sctp_recvmsg(sock, incoming, BUFF_SIZE, NULL, 0,0,0);
-    printf(incoming);
     if(n < 0) {
         printf("Error getting greeting\n");
         close(sock);
         exit(EXIT_FAILURE);
+    } else if (n > 0){
+        if(incoming[0] == '+'){
+            printf("%sGREETINGS\n", incoming);
+        }
     }
+
     printf("Please enter Password to login.\nPassword: \n");
     while(!status) {
         status = get_authentication(sock,incoming, out);

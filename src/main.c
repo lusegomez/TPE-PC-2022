@@ -45,9 +45,15 @@ main(const int argc, const char **argv) {
     log(INFO, "%s", "Iniciando proxy...");
     parse_args(argc, (char **)argv, &args);
     //for every user in the list, add them to the user list
-    for(int i = 0; i < N(args.users); i++) {
-        add_user(&args.users[i]);
+    if(args.users[0].name != 0) {
+        for(int i = 0; i < N(args.users); i++) {
+            if(add_user(&args.users[i]) == -1){
+                log(ERRORR, "Error adding user %s\n", args.users[i].name);
+            }
+        }
     }
+    init_admin_data();
+
 
     // no tenemos nada que leer de stdin
     close(0);

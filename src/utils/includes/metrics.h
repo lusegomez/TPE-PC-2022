@@ -2,24 +2,27 @@
 #define METRICS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-typedef struct metrics * metrics_t;
+typedef struct admin_data * admin_data_t;
 
-static metrics_t metrics;
+admin_data_t
+init_admin_data(void);
 
-struct metrics {
-    unsigned long concurrent_connections;
-    unsigned long total_connections;
-    unsigned long bytes_transfered;
-};
+void get_stats(char * m);
 
-char * get_stats(void);
+void add_concurrent(void);
 
-metrics_t
-init_metrics(void);
+void remove_concurrent(void);
+
+void add_bytes(unsigned long bytes);
+
+bool get_disector(void);
 
 void
-free_metrics(metrics_t metrics);
+free_admin_data(admin_data_t  adminData);
+
+bool disector_activation(bool activation);
 
 
 #endif
