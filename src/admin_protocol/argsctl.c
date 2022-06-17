@@ -67,7 +67,7 @@ parse_admin_options(int argc, char **argv, struct admin_opt * opt) {
 
     /* Parse command line arguments */
     int c;
-    const char *opts = "L:o:h";
+    const char *opts = "L:P:h";
     while ((c = getopt(argc, argv, opts)) != -1) {
         switch (c) {
             case 'h':
