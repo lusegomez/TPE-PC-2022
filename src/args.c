@@ -39,9 +39,9 @@ user(char *s, struct users *user) {
 
 static void
 version(void) {
-    fprintf(stderr, "socks5v version 0.0\n"
-                    "ITBA Protocolos de Comunicación 2020/1 -- Grupo X\n"
-                    "AQUI VA LA LICENCIA\n");
+    fprintf(stderr, "socks5v version 1.0\n"
+                    "ITBA Protocolos de Comunicación 2022/2 -- Grupo 12\n"
+                    "LICENCIA\n");
 }
 
 static void
@@ -56,13 +56,7 @@ usage(const char *progname) {
         "   -P <conf port>   Puerto entrante conexiones configuracion\n"
         "   -u <name>:<pass> Usuario y contraseña de usuario que puede usar el proxy. Hasta 10.\n"
         "   -v               Imprime información sobre la versión versión y termina.\n"
-        "\n"
-        "   --doh-ip    <ip>    \n"
-        "   --doh-port  <port>  XXX\n"
-        "   --doh-host  <host>  XXX\n"
-        "   --doh-path  <host>  XXX\n"
-        "   --doh-query <host>  XXX\n"
-
+        "   -N               Deshabilita los disectors.\n"
         "\n",
         progname);
     exit(1);
@@ -92,17 +86,7 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
     int nusers = 0;
 
     while (true) {
-        int option_index = 0;
-        static struct option long_options[] = {
-            { "doh-ip",    required_argument, 0, 0xD001 },
-            { "doh-port",  required_argument, 0, 0xD002 },
-            { "doh-host",  required_argument, 0, 0xD003 },
-            { "doh-path",  required_argument, 0, 0xD004 },
-            { "doh-query", required_argument, 0, 0xD005 },
-            { 0,           0,                 0, 0 }
-        };
-
-        c = getopt_long(argc, argv, "hl:L:Np:P:u:v", long_options, &option_index);
+        c = getopt(argc, argv, "hl:L:Np:P:u:v");
         if (c == -1)
             break;
 
@@ -137,21 +121,6 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
             case 'v':
                 version();
                 exit(0);
-                break;
-            case 0xD001:
-                args->doh.ip = optarg;
-                break;
-            case 0xD002:
-                args->doh.port = port(optarg);
-                break;
-            case 0xD003:
-                args->doh.host = optarg;
-                break;
-            case 0xD004:
-                args->doh.path = optarg;
-                break;
-            case 0xD005:
-                args->doh.query = optarg;
                 break;
             default:
                 fprintf(stderr, "unknown argument %d.\n", c);

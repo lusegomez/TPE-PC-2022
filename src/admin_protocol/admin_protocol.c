@@ -33,7 +33,7 @@ static const struct state_definition *
 admin_describe_states(void)
 {
     return client_statbl;
-};
+}
 
 
 static void
@@ -287,7 +287,7 @@ send_to_client(struct selector_key * key) {
     uint8_t * ptr = buffer_read_ptr(buff, &size);
      if(n = sctp_sendmsg(key->fd, ptr , size,
                                NULL, 0, 0, 0, 0, 0, 0) < 0) {
-         log(ERROR, "Error sending message to client");
+         log(ERRORR, "Error sending message to client");
          return -1;
      }
     buffer_read_adv(buff, size);
@@ -345,56 +345,6 @@ parse_command(struct selector_key * key) {
             buffer_write_adv(buff, strlen(message));
             admin->state = COMMANDS;
             free(message);
-            break;
-
-        case GETCMD:
-
-            opt = get_opt();
-            if(opt->cmd != NULL) {
-                message = malloc(2048);
-                memset(message,0, 2048);
-                message[0] = '+';
-                strcat(message, opt->cmd);
-                strcat(message, "\n");
-                flag = 1;
-
-            } else {
-                message = "-ERR\n";
-            }
-            memcpy(ptr, message, strlen(message));
-            buffer_write_adv(buff, strlen(message));
-            if(flag) {
-                free(message);
-            }
-            admin->state = COMMANDS;
-            break;
-
-        case SETCMD:
-
-            opt = get_opt();
-            if (opt == NULL) {
-                message = "-ERR\n";
-            } else {
-                buff = &admin->read_buffer;
-                ptr = buffer_read_ptr(buff,&size);
-                int j = 0;
-                while(buffer_can_read(buff)) {
-                    buf[j] = ptr[j];
-                    j++;
-                    buffer_read_adv(buff, 1);
-                }
-                buff = &admin->write_buffer;
-                ptr = buffer_read_ptr(buff,&size);
-                if(opt->cmd == NULL) {
-                    opt->cmd = malloc(sizeof(buf));
-                }
-                strcpy(opt->cmd, buf);
-                message = "+OK\n";
-            }
-            memcpy(ptr, message, strlen(message));
-            buffer_write_adv(buff, strlen(message));
-            admin->state = COMMANDS;
-            log(INFO, "Command changed to %s", opt->cmd);
             break;
 
         case LOGOUT:

@@ -5,6 +5,7 @@
 #include "../../includes/buffer.h"
 #include "../../includes/stm.h"
 #include "../../includes/args.h"
+#include "../../utils/includes/logger.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -82,7 +83,6 @@ parse_command(struct selector_key * key);
 
 static unsigned
 command_response(struct selector_key * key);
-
 
 struct admin *
 new_admin(int client_fd);

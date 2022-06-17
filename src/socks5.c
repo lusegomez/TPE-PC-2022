@@ -17,8 +17,18 @@
 #include "./includes/selector.h"
 #include "./includes/socks5_states.h"
 #include "./includes/parser.h"
+#include "./utils/includes/logger.h"
+#include "./utils/includes/metrics.h"
 
 struct socks5 * pool = NULL;
+static metrics_t metrics;
+
+char * get_stats(void)
+{
+    char to_ret[100];
+    sprintf(to_ret, "+Total connections: %lu\nConcurrent connections: %lu\nTotal bytes transferred: %lu\n", metrics->total_connections, metrics->concurrent_connections, metrics->bytes_transfered);
+    return to_ret;
+}
 
 const struct state_definition states_definition[] = {
         {
@@ -151,8 +161,10 @@ destroy_socks5(struct selector_key *key) {
 
 void free_socks5(struct socks5 * sock) {
     if(sock->hello != NULL) {
-        if(sock->hello->hello_parser != NULL && sock->hello->hello_parser->methods != NULL) {
-            free(sock->hello->hello_parser->methods);
+        if(sock->hello->hello_parser != NULL) {
+            if(sock->hello->hello_parser->methods != NULL) {
+                free(sock->hello->hello_parser->methods);
+            }
             free(sock->hello->hello_parser);
         }
         free(sock->hello);
@@ -164,8 +176,10 @@ void free_socks5(struct socks5 * sock) {
         free(sock->hello_auth);
     }
     if(sock->request_read != NULL) {
-        if(sock->request_read->req_parser != NULL && sock->request_read->req_parser->destaddr != NULL) {
-            free(sock->request_read->req_parser->destaddr);
+        if(sock->request_read->req_parser != NULL) {
+            if(sock->request_read->req_parser->destaddr != NULL) {
+                free(sock->request_read->req_parser->destaddr);
+            }
             free(sock->request_read->req_parser);
         }
         free(sock->request_read);
