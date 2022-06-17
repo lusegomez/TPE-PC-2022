@@ -82,7 +82,8 @@ main(const int argc, const char **argv) {
     {
         goto finally;
     }
-    fprintf(stdout, "Listening on TCP port %d\n", args.socks_port);
+    fprintf(stdout, "[PROXY] Listening on TCP port %d\n", args.socks_port);
+    fprintf(stdout, "[MANAGEMENT] Listening on SCTP port %d\n", args.mng_port);
 /*    
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
