@@ -35,17 +35,6 @@ unsigned init_pop3_parsers(struct selector_key * key){
     return COPY;
 }
 
-void to_upper_case(char * str, int n, struct socks5 * sock){
-    int i = 0;
-    while(str[i] != '\0' && i < n && sock->pop3->cmd_index < 4){
-        if(sock->pop3->cmd[sock->pop3->cmd_index] == '\0' && isalpha(str[i])){
-            sock->pop3->cmd[sock->pop3->cmd_index] = toupper(str[i]);
-            sock->pop3->cmd_index++;
-        }
-        i++;
-    }
-}
-
 //parse pop3 user and pass
 void parse_pop3(struct selector_key * key, buffer * buffer) {
     struct socks5 *sock = ATTACHMENT(key);
