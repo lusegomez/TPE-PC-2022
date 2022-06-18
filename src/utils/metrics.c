@@ -39,7 +39,7 @@ bool get_disector(void){
 
 void get_stats(char * m)
 {
-    sprintf(m, "+2 \n%lu %lu %lu\n", adminData->total_connections, adminData->concurrent_connections, adminData->bytes_transfered);
+    sprintf(m, "+2 %lu %lu %lu\n", adminData->total_connections, adminData->concurrent_connections, adminData->bytes_transfered);
 
 }
 

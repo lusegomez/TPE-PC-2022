@@ -9,7 +9,6 @@ static int total_users = 0;
 static int total_admins = 0;
 
 static struct users * users = NULL;
-static struct users * users_admins = NULL;
 
 int add_user(struct users * usr){
     if(total_users == MAX_USERS){
@@ -23,6 +22,11 @@ int add_user(struct users * usr){
     if(users == NULL){
         users = calloc(MAX_USERS, sizeof(struct users));
         if (users == NULL) {
+            return -1;
+        }
+    }
+    for(int i = 0; i < total_users; i++){
+        if(strcmp(users[i].name, usr->name) == 0) {
             return -1;
         }
     }
@@ -70,21 +74,22 @@ bool can_login(uint8_t * user, uint8_t * pass){
     return false;
 }
 
-
-bool is_admin(uint8_t * user, uint8_t * pass){
-    for (int i = 0; i < total_admins; i++) {
-        if(strcmp((char *)user, users_admins[i].name) == 0 && strcmp((char *)pass, users_admins[i].pass)) {
-            return true;
-        }
-    }
-    return false;
+int get_total_users(){
+    return total_users;
 }
 
+
 char * get_users() {
-    char *to_ret = calloc(MAX_USERS, MAX_USER_NAME_LEN);
+    if(total_users == 0){
+        return NULL;
+    }
+    char *to_ret = calloc(total_users, MAX_USER_NAME_LEN);
     for (int i = 0; i < total_users; i++) {
         strcat(to_ret, users[i].name);
-        strcat(to_ret, "\n");
+        if(i < total_users - 1){
+            strcat(to_ret, " ");
+        }
     }
+    strcat(to_ret, "\n");
     return to_ret;
 }

@@ -58,12 +58,14 @@ unsigned hello_auth_read(struct selector_key * key){
             if(!can_login(hap->user, hap->pass)) {
                 sock->hello_auth->status = STATUS_FAILURE;
                 plog(INFO, "Failed attempt to login! user: %s", hap->user);
+            } else {
+                plog(INFO, "User %s connected", hap->user);
             }
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
                 plog(ERRORR, "%s", "Failed to set WRITE interest", __FILE__, __LINE__);
                 goto finally;
             }
-            plog(INFO, "User %s connected", hap->user);
+
             hello_auth_response(&sock->write_buffer, sock->hello_auth); 
         } else if(state == hello_auth_error) {
             hello_auth_response(&sock->write_buffer, sock->hello_auth); 

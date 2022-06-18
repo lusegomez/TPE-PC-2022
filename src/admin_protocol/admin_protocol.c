@@ -335,8 +335,12 @@ parse_command(struct selector_key * key) {
     char * token = strtok((char *)ptr, " ");
     int comando = atoi(token);
     char * arg = strtok(NULL, " ");
+    char * user = NULL;
+    char * pass = NULL;
+    char * user_list = NULL;
+    bool flag = false;
     bool valid = true;
-    if(comando == DISECTOR_ACTIVATION || comando == ADD_USER || comando == DELETE_USER || comando == USER_ACCESS_HISTORY){
+    if(comando == DISECTOR_ACTIVATION || comando == ADD_USER || comando == DELETE_USER){
         if (arg != NULL) {
             if(strtok(NULL, " ")) {
                 valid = false;
@@ -350,7 +354,7 @@ parse_command(struct selector_key * key) {
         }
     }
     selector_set_interest(key->s, ADMIN_ATTACHMENT(key)->client_fd, OP_WRITE);
-//    buffer_read_adv(buff, 1);
+    buffer_read_adv(buff, size);
     buff = &admin->write_buffer;
     ptr = buffer_write_ptr(buff, &size);
     if(!valid) {
@@ -365,13 +369,14 @@ parse_command(struct selector_key * key) {
         admin->state = COMMANDS;
         return COMMANDS;
     }
-    char *message = malloc(255);
+    char *message;
     //bool disector_ret;
 
     switch (comando) {
 
         case STATS:
-
+            message = malloc(BUFFERSIZE);
+            flag = true;
             get_stats(message);
             if(message == NULL) {
                 message = "-2 \n";
@@ -384,7 +389,6 @@ parse_command(struct selector_key * key) {
             break;
 
         case ADMIN_CLOSE_CONNECTION:
-
             message = "+3 \n";
             memcpy(ptr, message, strlen(message));
             buffer_write_adv(buff, strlen(message));
@@ -395,10 +399,10 @@ parse_command(struct selector_key * key) {
             message = "+4 \n";
             if(*arg == '+'){
                 disector_activation(true);
-                message = "+4 \n+";
+                message = "+4 \n";
             } else if(*arg == '-') {
                 disector_activation(false);
-                message = "+4 \n-";
+                message = "+4 \n";
             } else {
                 message = "-4 \n";
             }
@@ -406,24 +410,79 @@ parse_command(struct selector_key * key) {
             buffer_write_adv(buff, strlen(message));
             admin->state = COMMANDS;
             break;
-        case DISECTOR_DATA:
+        case GET_DISECTOR:
+            if(get_disector()){
+                message = "+5 +\n";
+            } else {
+                message = "+5 -\n";
+            }
+            admin->state = COMMANDS;
+            memcpy(ptr, message, strlen(message));
+            buffer_write_adv(buff, strlen(message));
             break;
         case ADD_USER:
+            user = strtok(arg, ":");
+            pass = strtok(NULL, ":");
+            if (user == NULL || pass == NULL || strtok(NULL, ":")) {
+                message = "-6 \n";
+
+            } else {
+                struct users new_user;
+                new_user.name = malloc(strlen(user) + 1);
+                strcpy(new_user.name, user);
+                new_user.pass = malloc(strlen(pass) + 1);
+                strcpy(new_user.pass, pass);
+                if(add_user(&new_user) == -1){
+                    message = "-6 \n";
+                } else {
+                    message = "+6 \n";
+                }
+                free(new_user.name);
+                free(new_user.pass);
+            }
+            admin->state = COMMANDS;
+            memcpy(ptr, message, strlen(message));
+            buffer_write_adv(buff, strlen(message));
             break;
         case DELETE_USER:
+            if(delete_user(arg) == -1){
+                message = "-7 \n";
+            } else {
+                message = "+7 \n";
+            }
+            admin->state = COMMANDS;
+            memcpy(ptr, message, strlen(message));
+            buffer_write_adv(buff, strlen(message));
             break;
         case LIST_USERS:
-            break;
-        case USER_ACCESS_HISTORY:
+            user_list = get_users();
+            if(user_list == NULL && get_total_users() > 0) {
+                message = "-8 \n";
+            } else if(user_list == NULL && get_total_users() == 0){
+                message = "+8 \n";
+            } else {
+                message = malloc(strlen(user_list) + 5);
+                strcpy(message, "+8 ");
+                message = strcat(message, user_list);
+                flag = true;
+            }
+            admin->state = COMMANDS;
+            memcpy(ptr, message, strlen(message));
+            buffer_write_adv(buff, strlen(message));
+
             break;
         default:
-            message = "-ERR\n";
+            message = "-ERR \n";
             memcpy(ptr, message, strlen(message));
             buffer_write_adv(buff, strlen(message));
             admin->state = COMMANDS;
             break;
 
     }
-    free(message);
+    if(flag) {
+        free(message);
+        flag = false;
+    }
+
     return COMMANDS;
 }

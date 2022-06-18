@@ -29,17 +29,17 @@
 
 #define N(x)                (sizeof(x)/sizeof((x)[0]))
 #define ADMIN_ATTACHMENT(key)     ( ( struct admin * )(key)->data)
+#define BUFFERSIZE 2048
 
 typedef enum command_parser_states
 {
     STATS=2,
     ADMIN_CLOSE_CONNECTION,
     DISECTOR_ACTIVATION, //tiene args
-    DISECTOR_DATA,
+    GET_DISECTOR,
     ADD_USER, //tiene args
     DELETE_USER, //tiene args
     LIST_USERS,
-    USER_ACCESS_HISTORY,//tiene args
 
 
 } command_parser_states;

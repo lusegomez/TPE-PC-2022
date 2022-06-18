@@ -19,23 +19,21 @@
 #define STATSC 2
 #define LOGOUTC 3
 #define DISECTOR_ACTIVATION 4
-#define DISECTOR_DATA 5
+#define GET_DISECTOR 5
 #define ADD_USER 6
 #define DELETE_USER 7
 #define LIST_USERS 8
-#define USER_ACCESS_HISTORY 9
-#define HELPC    10
-int totalCommands = 9;
+#define HELPC    9
+int totalCommands = 8;
 char * commands[] = {
         "help",
         "stats",
-        "logout",
+        "close_connection",
         "disector_activation",
-        "disector_data",
+        "get_disector",
         "add_user",
         "delete_user",
         "list_users",
-        "user_access_history",
 };
 
 static int isCommand(char * name){
@@ -51,42 +49,43 @@ char * help_message = "These are all available commmands:\n"
                       "STATS\n\tPrints useful statistics about the proxy server\n"
                       "CLOSE_CONNECTION\n\tDisconnects admin client\n"
                       "DISECTOR_ACTIVATION\n\tActivates or deactivates the disector\n"
-                      "DISECTOR_DATA\n\tGets data from the disector\n"
+                      "GET_DISECTOR\n\tGets disector status\n"
                       "ADD_USER <user:pass>\n\tAdds a new user to the system\n"
                       "DELETE_USER <user>\n\tDeletes a user from the system\n"
                       "LIST_USERS\n\tLists all users in the system\n"
-                      "USER_ACCESS_HISTORY <user>\n\tGets the access history of a user\n"
-                      "HELP\n\tPrints this message\n";
+                      "HELP\n\tPrints this message\n\n";
 
 static int
 parse_command(int sock, char * in_buff, char * out_buffer) {
     memset(out_buffer, 0, BUFF_SIZE);
     memset(in_buff, 0, BUFF_SIZE);
     fgets(out_buffer, BUFF_SIZE, stdin);
-    /*      strlen siempre devuelve >=0
-    if (strlen(out_buffer) < 0) {
-        return -1;
-    }*/
-    //char args[100] = {0};
-    out_buffer[strlen(out_buffer) - 1] = '\0';
+    if (strlen(out_buffer) > 0) {
+        out_buffer[strlen(out_buffer) - 1] = '\0';
+    }
     char * token = strtok(out_buffer, " ");
     char * command = token;
+    if (token == NULL) {
+        printf("-ERR \n");
+        printf("Invalid command!\n");
+        return -1;
+    }
     while (*token){
         *token = tolower(*token);
         token++;
     }
     int command_index = isCommand(command);
     if(command_index == -1) {
-        printf("-Err \n");
+        printf("-ERR \n");
         printf("Invalid command!\n");
         return -1;
     } else {
         command_index += 1;
     }
-    char * arg = NULL;
-    if(command_index == 4 || command_index == 6 || command_index == 7 || command_index == 9){
-        arg = strtok(NULL, " ");
-        if (arg != NULL) {
+    char arg[BUFF_SIZE] = {0};
+    if(command_index == DISECTOR_ACTIVATION || command_index == ADD_USER || command_index == DELETE_USER ){
+        strcpy(arg,strtok(NULL, " "));
+        if (arg[0] != 0) {
             if(strtok(NULL, " ")) {
                 printf("-Err \n");
                 printf("Too many arguments!\n");
@@ -110,7 +109,7 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     memset(out_buffer, 0, BUFF_SIZE);
     memset(in_buff, 0, BUFF_SIZE);
     sprintf(out_buffer, "%d ", command_index);
-    if(arg != NULL){
+    if(arg[0] != 0){
         strcat(out_buffer, arg);
     }
     strcat(out_buffer, "\n");
