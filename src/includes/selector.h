@@ -3,6 +3,7 @@
 
 #include <sys/time.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * selector.c - un muliplexor de entrada salida
@@ -168,6 +169,10 @@ selector_set_interest(fd_selector s, int fd, fd_interest i);
 /** permite cambiar los intereses para un file descriptor */
 selector_status
 selector_set_interest_key(struct selector_key *key, fd_interest i);
+
+
+selector_status selector_add_interest(fd_selector s, int fd, fd_interest i);
+selector_status selector_remove_interest(fd_selector s, int fd, fd_interest i);
 
 
 /**

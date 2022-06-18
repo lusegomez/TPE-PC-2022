@@ -3,8 +3,8 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include "logger.h"
-#include "util.h"
+#include "src/utils/includes/logger.h"
+#include "src/utils/includes/util.h"
 
 int
 main(int argc, char *argv[])

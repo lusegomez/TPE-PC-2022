@@ -9,17 +9,31 @@
 #include "./includes/hello_auth_st.h"
 #include "../includes/socks5_states.h"
 #include "../includes/socks5.h"
+#include "../utils/includes/users.h"
+
+#include "../utils/includes/logger.h"
 
 #define AUTH_VERSION 0x01
 #define AUTH_RESPONSE 2
-#define STATUS_SUCCESS 0x00 
+#define STATUS_SUCCESS 0x00
+#define STATUS_FAILURE 0x01
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+
 
 void hello_auth_init(const unsigned state, struct selector_key *key){
     struct hello_auth_st * st = ATTACHMENT(key)->hello_auth;
     st->hello_auth_parser = malloc(sizeof(struct hello_auth_parser));
     hello_auth_parser_init(st->hello_auth_parser);
+    plog(DEBUG, "%s: %s:%d", "Hello auth parser initialized", __FILE__, __LINE__);
 
+}
+
+void hello_auth_reset(struct hello_auth_st * ha){
+    ha->status = -1;
+    if(ha->hello_auth_parser != NULL){
+        free(ha->hello_auth_parser);
+        plog(DEBUG, "%s: %s:%d", "Hello auth parser resources were freed", __FILE__, __LINE__);
+    }
 }
 
 void hello_auth_response(buffer * b, struct hello_auth_st * hello_auth){
@@ -41,13 +55,22 @@ unsigned hello_auth_read(struct selector_key * key){
         buffer_write_adv(&sock->read_buffer, ret);
         enum hello_auth_state state = consume_hello_auth(&sock->read_buffer, hap); 
         if(state == hello_auth_end){
+            if(!can_login(hap->user, hap->pass)) {
+                sock->hello_auth->status = STATUS_FAILURE;
+                plog(INFO, "Failed attempt to login! user: %s", hap->user);
+            } else {
+                plog(INFO, "User %s connected", hap->user);
+            }
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "Failed to set WRITE interest", __FILE__, __LINE__);
                 goto finally;
-            }   
+            }
+
             hello_auth_response(&sock->write_buffer, sock->hello_auth); 
         } else if(state == hello_auth_error) {
             hello_auth_response(&sock->write_buffer, sock->hello_auth); 
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "Failed to set WRITE interest", __FILE__, __LINE__);
                 goto finally;
             }
         }
@@ -70,11 +93,11 @@ unsigned hello_auth_write(struct selector_key * key) {
         if(!buffer_can_read(&sock->write_buffer)){
             if(sock->hello_auth->status == STATUS_SUCCESS){
                 if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){
+                    plog(ERRORR, "%s", "Failed to set READ interest", __FILE__, __LINE__);
                     goto finally;
                 }
                 return REQUEST_READING;
             } else {
-                    //TODO: cerrar conexion 
                     goto finally;
             }
 
@@ -88,3 +111,5 @@ finally:
     return ERROR;
 
 }
+
+

@@ -1,5 +1,5 @@
-#ifndef SOCKS5
-#define SOCKS5
+#ifndef SOCKS5_H
+#define SOCKS5_H
 
 #include "stm.h"
 #include "selector.h"
@@ -8,11 +8,16 @@
 #include "../state_machines/includes/hello_st.h"
 #include "../state_machines/includes/hello_auth_st.h"
 #include "../state_machines/includes/request_read_st.h"
+#include "../utils/includes/connect.h"
+#include "../state_machines/includes/dns_query_st.h"
+#include "../state_machines/includes/copy_st.h"
+#include "../utils/includes/metrics.h"
 
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+#define N(x) (sizeof(x)/sizeof((x)[0]))
 #define MAX_POOL 500
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 4096
 
 struct socks5 {
     //Client data
@@ -33,11 +38,14 @@ struct socks5 {
     struct hello_st * hello;
     struct hello_auth_st * hello_auth;
     struct request_read_st * request_read;
-//    struct request_st request;
-//    struct copy copy;
-//
-//    struct connecting conn;
-//    struct copy copy_origin;
+    struct connect * connect_origin; 
+    struct dns_query_st * dns_query;
+    struct copy_st * copy;
+    struct pop3_st * pop3;
+    bool closing;
+
+    bool sniffed;
+    bool isPop;
 
 
     struct state_machine stm;
@@ -53,6 +61,7 @@ struct socks5 {
 
 };
 
+
 void socksv5_passive_accept(struct selector_key * key);
 
 
@@ -60,12 +69,12 @@ void socks5_handle_read(struct selector_key * key);
 void socks5_handle_write(struct selector_key * key);
 void socks5_handle_block(struct selector_key * key);
 void socks5_handle_close(struct selector_key * key);
+void socksv5_pool_destroy();
 
 static const fd_handler socks5_active_handler = {
     .handle_read = socks5_handle_read,
     .handle_write = socks5_handle_write,
     .handle_block = socks5_handle_block,
-    .handle_close = socks5_handle_close
 };
 
 

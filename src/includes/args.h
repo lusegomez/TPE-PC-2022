@@ -8,27 +8,24 @@
 struct users {
     char *name;
     char *pass;
+//    char * accesses[];
 };
 
-struct doh {
-    char           *host;
-    char           *ip;
-    unsigned short  port;
-    char           *path;
-    char           *query;
-};
 
 struct socks5args {
     char           *socks_addr;
+    char           *socks_addr6;
+
     unsigned short  socks_port;
 
     char *          mng_addr;
+    char *          mng_addr6;
     unsigned short  mng_port;
 
     bool            disectors_enabled;
 
-    struct doh      doh;
     struct users    users[MAX_USERS];
+    int            nusers;
 };
 
 /**

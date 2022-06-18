@@ -1,5 +1,5 @@
-#ifndef SOCKS5_STATE
-#define SOCKS5_STATE
+#ifndef SOCKS5_STATE_H
+#define SOCKS5_STATE_H
 
 
 #include "stm.h"
@@ -11,10 +11,8 @@ enum socks5_state {
     HELLO_AUTH,
     REQUEST_READING,
     DNS_QUERY,
- //   DNS_RESPONSE,
-    CONNECT_ORIGIN,
     RESPONSE_WRITING,
-//    COPY,
+    COPY,
     CLOSE_CONNECTION,
     ERROR
 

@@ -8,6 +8,9 @@
 
 #include "../includes/args.h"
 #include "../includes/selector.h"
-int create_passive_socket(int * socket, struct socks5args args);
+int create_passive_socket_ipv4(int * s, struct socks5args args);
+int create_passive_socket_ipv6(int * s, struct socks5args args);
+int create_passive_socket_mngt_ipv4(int * s, struct socks5args args);
+int create_passive_socket_mngt_ipv6(int * s, struct socks5args args);
 
 #endif

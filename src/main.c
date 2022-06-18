@@ -24,10 +24,14 @@
 #include <netinet/tcp.h>
 #include "./includes/selector.h"
 #include "./includes/socks5.h"
+#include "./includes/passive_sockets.h"
+#include "./includes/args.h"
+#include "./utils/includes/users.h"
+#include "./admin_protocol/includes/admin_protocol.h"
 
-/*
-#include "socks5nio.h"
-*/
+#define N(x) (sizeof(x)/sizeof((x)[0]))
+
+struct socks5args args;
 static bool done = false;
 
 static void
@@ -38,25 +42,19 @@ sigterm_handler(const int signal) {
 
 int
 main(const int argc, const char **argv) {
-    unsigned port = 1080;
-
-    if(argc == 1) {
-        // utilizamos el default
-    } else if(argc == 2) {
-        char *end     = 0;
-        const long sl = strtol(argv[1], &end, 10);
-
-        if (end == argv[1]|| '\0' != *end 
-           || ((LONG_MIN == sl || LONG_MAX == sl) && ERANGE == errno)
-           || sl < 0 || sl > USHRT_MAX) {
-            fprintf(stderr, "port should be an integer: %s\n", argv[1]);
-            return 1;
-        }
-        port = sl;
-    } else {
-        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
-        return 1;
+    plog(INFO, "%s", "Iniciando proxy...");
+    parse_args(argc, (char **)argv, &args);
+    //for every user in the list, add them to the user list
+    for(int i = 0; i < args.nusers; i++) {
+            if(add_user(&args.users[i]) == -1){
+                plog(ERRORR, "Error adding user %s", args.users[i].name);
+            } else {
+                plog(INFO, "Added user %s", args.users[i].name);
+            }
     }
+
+    init_admin_data();
+
 
     // no tenemos nada que leer de stdin
     close(0);
@@ -65,42 +63,40 @@ main(const int argc, const char **argv) {
     selector_status   ss      = SELECTOR_SUCCESS;
     fd_selector selector      = NULL;
 
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family      = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port        = htons(port);
 
-    const int server = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(server < 0) {
-        err_msg = "unable to create socket";
+    //TODO:Set ipv4/ipv6
+    int passive_socket_ipv4 = -1;
+    int passive_socket_ipv6 = -1;
+    int passive_socket_mngt_ipv4 = -1;
+    int passive_socket_mngt_ipv6 = -1;
+
+    int error_ipv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
+    if(error_ipv4 == -1) {
+        plog(INFO, "%s ", "Error creating socket IPv4");
+    }
+    int error_ipv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
+    if(error_ipv6 == -1) {
+        plog(INFO, "%s ", "Error creating socket IPv6");
+    }
+    int error_mngt_ipv4 = create_passive_socket_mngt_ipv4(&passive_socket_mngt_ipv4, args);
+    if(error_mngt_ipv4 == -1){
+        plog(INFO, "%s ", "Error creating socket  SCTP IPv4");
+    }
+    int error_mngt_ipv6 = create_passive_socket_mngt_ipv6(&passive_socket_mngt_ipv6, args);
+    if(error_mngt_ipv6 == -1){
+        plog(INFO, "%s ", "Error creating socket  SCTP IPv6");
+    }
+    if ((error_ipv4 == -1 && error_ipv6 == -1) || (error_mngt_ipv4 == -1 && error_mngt_ipv6 == -1))
+    {
+        err_msg = "Passive sockets could not be created";
         goto finally;
     }
+    plog(INFO, "%s %d", "[PROXY] Listening on TCP port", args.socks_port);
+    plog(INFO, "%s %d ", "[ADMIN] Listening on SCTP port", args.mng_port);
 
-    fprintf(stdout, "Listening on TCP port %d\n", port);
-
-    // man 7 ip. no importa reportar nada si falla.
-    setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int));
-
-    if(bind(server, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-        err_msg = "unable to bind socket";
-        goto finally;
-    }
-
-    if (listen(server, 20) < 0) {
-        err_msg = "unable to listen";
-        goto finally;
-    }
-
-    // registrar sigterm es útil para terminar el programa normalmente.
-    // esto ayuda mucho en herramientas como valgrind.
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
 
-    if(selector_fd_set_nio(server) == -1) {
-        err_msg = "getting server socket flags";
-        goto finally;
-    }
     const struct selector_init conf = {
         .signal = SIGALRM,
         .select_timeout = {
@@ -121,14 +117,52 @@ main(const int argc, const char **argv) {
     const struct fd_handler socksv5 = {
         .handle_read       = socksv5_passive_accept,
         .handle_write      = NULL,
-        .handle_close      = NULL, // nada que liberar
+        .handle_close      = NULL,
     };
-    ss = selector_register(selector, server, &socksv5,
-                                              OP_READ, NULL);
-    if(ss != SELECTOR_SUCCESS) {
-        err_msg = "registering fd";
+    const struct fd_handler mngt_socksv5 = {
+        .handle_read = admin_connection,
+        .handle_write = NULL,
+        .handle_close = NULL,
+    };
+    bool ipv4_flag = false;
+    bool ipv6_flag = false;
+    bool ipv4_mngt_flag = false;
+    bool ipv6_mngt_flag = false;
+    if(passive_socket_ipv4 != -1){
+        ss = selector_register(selector, passive_socket_ipv4, &socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv4_flag = true;
+        }
+    }
+    if(passive_socket_ipv6 != -1){
+        ss = selector_register(selector, passive_socket_ipv6, &socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv6_flag = true;
+        }
+    }
+    if(passive_socket_mngt_ipv4 != -1){
+        ss = selector_register(selector, passive_socket_mngt_ipv4, &mngt_socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv4_mngt_flag = true;
+        }
+    }
+    if(passive_socket_mngt_ipv6 != -1){
+        ss = selector_register(selector, passive_socket_mngt_ipv6, &mngt_socksv5, OP_READ, NULL);
+        if(ss != SELECTOR_SUCCESS) {
+            ipv6_mngt_flag = true;
+        }
+    }
+
+    if((ipv4_flag && ipv6_flag)){
+        err_msg = "Error registering sockets IPv4 and IPv6";
         goto finally;
     }
+
+    if((ipv4_mngt_flag && ipv6_mngt_flag)){
+        err_msg = "Error registering sockets IPv4 and IPv6 for management protocol";
+        goto finally;
+    }       
+  
     for(;!done;) {
         err_msg = NULL;
         ss = selector_select(selector);
@@ -144,10 +178,13 @@ main(const int argc, const char **argv) {
     int ret = 0;
 finally:
     if(ss != SELECTOR_SUCCESS) {
+        plog(ERRORR, "%s: %s", err_msg, ss == SELECTOR_IO? strerror(errno) : selector_error(ss));
+        /*
         fprintf(stderr, "%s: %s\n", (err_msg == NULL) ? "": err_msg,
                                   ss == SELECTOR_IO
                                       ? strerror(errno)
                                       : selector_error(ss));
+        */
         ret = 2;
     } else if(err_msg) {
         perror(err_msg);
@@ -158,11 +195,19 @@ finally:
     }
     selector_close();
 
-    close(server);
-    //socksv5_pool_destroy();
-
-    if(server >= 0) {
-        close(server);
+    if (passive_socket_ipv4 != -1) {
+        close(passive_socket_ipv4);
     }
+    if (passive_socket_ipv6 != -1) {
+        close(passive_socket_ipv6);
+    }
+    if (passive_socket_mngt_ipv4 != -1) {
+        close(passive_socket_mngt_ipv4);
+    }
+    if (passive_socket_mngt_ipv6 != -1) {
+        close(passive_socket_mngt_ipv6);
+    }
+    socksv5_pool_destroy();
+
     return ret;
 }
