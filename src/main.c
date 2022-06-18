@@ -49,7 +49,7 @@ main(const int argc, const char **argv) {
             if(add_user(&args.users[i]) == -1){
                 plog(ERRORR, "Error adding user %s", args.users[i].name);
             } else {
-                plog(INFO, "Added user %s", args.users[i].name);
+                plog(INFO, "Added user %s to proxy", args.users[i].name);
             }
     }
 

@@ -15,7 +15,7 @@ int add_user(struct users * usr){
         return -1;
     }
 
-    if(usr->name == 0 || usr->pass == 0){
+    if(usr->name[0] == 0 || usr->pass[0] == 0){
         return -1;
     }
 
@@ -31,8 +31,14 @@ int add_user(struct users * usr){
         }
     }
 
+
     size_t name_len = strlen(usr->name) + 1;
     size_t pass_len = strlen(usr->pass) + 1;
+    for(int j = 0; j < pass_len; j++){
+        if(usr->pass[j] == ':'){
+            return -1;
+        }
+    }
     if(name_len > MAX_USER_NAME_LEN || pass_len > MAX_USER_PASS_LEN){
         return -1;
     }

@@ -160,7 +160,6 @@ struct admin *
 new_admin(int client_fd) {
     struct admin * admin;
     admin = malloc(sizeof(*admin));
-
     if (admin != NULL) {
         memset(admin, 0x00, sizeof(*admin));
 
@@ -178,7 +177,6 @@ new_admin(int client_fd) {
         buffer_init(&admin->read_buffer, N(admin->raw_buff_a), admin->raw_buff_a);
         buffer_init(&admin->write_buffer, N(admin->raw_buff_b), admin->raw_buff_b);
     }
-
     return admin;
 }
 
@@ -258,6 +256,7 @@ authenticate(struct selector_key * key) {
         }
         buffer_read_adv(buff,bytes);
         ADMIN_ATTACHMENT(key)->state = COMMANDS;
+        plog(INFO, "Admin connected to management server");
         return COMMANDS;
     } else {
         status = pass_auth(key,0);

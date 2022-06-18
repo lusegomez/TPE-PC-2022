@@ -25,6 +25,7 @@
 #define DELETE_USER 7
 #define LIST_USERS 8
 #define HELPC    9
+bool close_flag = false;
 int totalCommands = 8;
 char * commands[] = {
         "help",
@@ -103,6 +104,8 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
         plog(INFO, "%s", help_message);
         //printf("%s", help_message);
         return 1;
+    } else if(command_index == 3) {
+        close_flag = true;
     } else {
         if(strtok(NULL, " ")) {
             plog(DEBUG, "-ERR \n");
@@ -137,6 +140,9 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     } else {
         plog(DEBUG, "%s", in_buff);
         //printf("%s", in_buff);
+    }
+    if(close_flag){
+        return 0;
     }
 
 //    switch (command) {
@@ -203,6 +209,7 @@ main(const int argc, char **argv) {
     struct address_data addr;
     char out[BUFF_SIZE] = {0};
     char incoming[BUFF_SIZE] = {0};
+    bool stop = false;
     parse_admin_options(argc, argv, &opt);
     set_mgmt_address(&addr, opt.mgmt_addr, &opt);
     int sock = socket(addr.mgmt_domain, SOCK_STREAM, IPPROTO_SCTP);
@@ -234,8 +241,12 @@ main(const int argc, char **argv) {
 
     }
     plog(INFO, "%s", help_message);
-    while(1) {
+    while(!stop) {
         parse_command(sock, incoming, out);
+        if(close_flag){
+            plog(INFO, "Logging out...\n");
+            stop = true;
+        }
     }
     return 0;
 }
