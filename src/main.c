@@ -46,11 +46,7 @@ main(const int argc, const char **argv) {
     parse_args(argc, (char **)argv, &args);
     //for every user in the list, add them to the user list
     for(int i = 0; i < args.nusers; i++) {
-            if(add_user(&args.users[i]) == -1){
-                plog(ERRORR, "Error adding user %s", args.users[i].name);
-            } else {
-                plog(INFO, "Added user %s to proxy", args.users[i].name);
-            }
+        add_user(&args.users[i]);
     }
 
     init_admin_data();

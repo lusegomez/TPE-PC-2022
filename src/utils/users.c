@@ -16,17 +16,20 @@ int add_user(struct users * usr){
     }
 
     if(usr->name[0] == 0 || usr->pass[0] == 0){
+        plog(ERRORR, "Error adding user %s", usr->name);
         return -1;
     }
 
     if(users == NULL){
         users = calloc(MAX_USERS, sizeof(struct users));
         if (users == NULL) {
+            plog(ERRORR, "Error adding user %s", usr->name);
             return -1;
         }
     }
     for(int i = 0; i < total_users; i++){
         if(strcmp(users[i].name, usr->name) == 0) {
+            plog(ERRORR, "Error adding user %s", usr->name);
             return -1;
         }
     }
@@ -36,22 +39,26 @@ int add_user(struct users * usr){
     size_t pass_len = strlen(usr->pass) + 1;
     for(int j = 0; j < pass_len; j++){
         if(usr->pass[j] == ':'){
+            plog(ERRORR, "Error adding user %s", usr->name);
             return -1;
         }
     }
     if(name_len > MAX_USER_NAME_LEN || pass_len > MAX_USER_PASS_LEN){
+        plog(ERRORR, "Error adding user %s", usr->name);
         return -1;
     }
     users[total_users].name = malloc(name_len);
     users[total_users].pass = malloc(pass_len);
     memcpy(users[total_users].name, (const char *)usr->name, name_len);
     memcpy(users[total_users++].pass, (const char *)usr->pass, pass_len);
+    plog(INFO, "User %s added", usr->name);
     return 0;
 }
 
 //Delete user from the system
 int delete_user(char * username){
     if(total_users == 0){
+        plog(ERRORR, "Error deleting user %s", username);
         return -1;
     }
 
@@ -63,6 +70,7 @@ int delete_user(char * username){
                 users[j] = users[j + 1];
             }
             total_users--;
+            plog(ERRORR, "User %s deleted", username);
             return 0;
         }
     }
