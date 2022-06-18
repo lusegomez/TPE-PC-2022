@@ -102,6 +102,8 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
         }
 
     }
+    memset(cmd, 0, 4);
+    cmd_index = 0;
 }
 
 unsigned copy_read(struct selector_key * key){
