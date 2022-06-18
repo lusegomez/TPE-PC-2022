@@ -15,7 +15,7 @@ int add_user(struct users * usr){
         return -1;
     }
 
-    if(usr->name == 0 || usr->pass == 0){
+    if(usr->name[0] == 0 || usr->pass[0] == 0){
         return -1;
     }
 
