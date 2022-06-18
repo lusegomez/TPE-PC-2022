@@ -15,6 +15,7 @@
 #include <stdbool.h>
 
 #include "includes/argsctl.h"
+#include "../utils/includes/logger.h"
 
 #define STATSC 2
 #define LOGOUTC 3
@@ -66,8 +67,10 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     char * token = strtok(out_buffer, " ");
     char * command = token;
     if (token == NULL) {
-        printf("-ERR \n");
-        printf("Invalid command!\n");
+        plog(DEBUG, "-ERR \n");
+        plog(INFO, "Invalid command!\n");
+        //printf("-ERR \n");
+        //printf("Invalid command!\n");
         return -1;
     }
     while (*token){
@@ -76,8 +79,10 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     }
     int command_index = isCommand(command);
     if(command_index == -1) {
-        printf("-ERR \n");
-        printf("Invalid command!\n");
+        plog(DEBUG, "-ERR \n");
+        plog(INFO, "Invalid command!\n");
+        //printf("-ERR \n");
+        //printf("Invalid command!\n");
         return -1;
     } else {
         command_index += 1;
@@ -87,18 +92,23 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
         strcpy(arg,strtok(NULL, " "));
         if (arg[0] != 0) {
             if(strtok(NULL, " ")) {
-                printf("-Err \n");
-                printf("Too many arguments!\n");
+                plog(DEBUG, "-ERR \n");
+                plog(INFO, "Too many arguments!\n");
+                //printf("-Err \n");
+                //printf("Too many arguments!\n");
                 return -1;
             }
         }
     } else if( command_index == 1){
-        printf("%s", help_message);
+        plog(INFO, "%s", help_message);
+        //printf("%s", help_message);
         return 1;
     } else {
         if(strtok(NULL, " ")) {
-            printf("-Err \n");
-            printf("Too many arguments!\n");
+            plog(DEBUG, "-ERR \n");
+            plog(INFO, "Too many arguments!\n");
+            //printf("-Err \n");
+            //printf("Too many arguments!\n");
             return -1;
         }
     }
@@ -115,15 +125,18 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     strcat(out_buffer, "\n");
     n = sctp_sendmsg(sock, out_buffer, strlen(out_buffer), NULL, 0,0,0,0,0,0);
     if(n < 0) {
-        printf("Error sending command!\n");
+        plog(INFO, "Error sending command!\n");
+        //printf("Error sending command!\n");
         return -1;
     }
     n = sctp_recvmsg(sock,in_buff, BUFF_SIZE, NULL, 0,0,0);
     if(n < 0) {
-        printf("Error receiving response!\n");
+        plog(INFO, "Error receiving response!\n");
+        //printf("Error receiving response!\n");
         return -1;
     } else {
-        printf("%s", in_buff);
+        plog(DEBUG, "%s", in_buff);
+        //printf("%s", in_buff);
     }
 
 //    switch (command) {
@@ -159,21 +172,24 @@ get_authentication(int sock,char * in_buffer,char * out_buffer) {
     strtok(out_buffer, "\n");
     if ((n = sctp_sendmsg(sock, out_buffer, strlen(out_buffer),
                          NULL, 0, 0, 0, 0, 0, 0)) < 0) {
-        printf("ERROR\n");
+        plog(INFO, "ERROR\n");
+        //printf("ERROR\n");
         return -1;
     }
     nr = sctp_recvmsg(sock, in_buffer, BUFF_SIZE, NULL, 0, 0, 0);
     if (nr <= 0) {
-        printf("ERROR\n");
+        plog(INFO, "ERROR\n");
+        //printf("ERROR\n");
         return -1;
     }
     if (in_buffer[0] == '+') {
         //printf(in_buffer);
-        printf("%sWelcome Administrator!\n", in_buffer);
+        plog(INFO, "%sWelcome Administrator!\n", in_buffer);
+        //printf("%sWelcome Administrator!\n", in_buffer);
         return  1;
     } else {
         //printf(in_buffer);
-        printf("%sWrong Password, Try Again\n", in_buffer);
+        plog(INFO, "%sWrong Password, Try Again\n", in_buffer);
         return 0;
     }
 }
@@ -191,33 +207,33 @@ main(const int argc, char **argv) {
     set_mgmt_address(&addr, opt.mgmt_addr, &opt);
     int sock = socket(addr.mgmt_domain, SOCK_STREAM, IPPROTO_SCTP);
     if(sock < 0) {
-        printf("Failed to create socket\n");
+        plog(INFO, "Failed to create socket\n");
         close(sock);
         exit(EXIT_FAILURE);
     }
     int con = connect(sock, (struct sockaddr*)&addr.mgmt_addr, addr.mgmt_addr_len);
     if (con < 0) {
-        printf("Failed to connect to management\n");
+        plog(INFO, "Failed to connect to management\n");
         close(sock);
         exit(EXIT_FAILURE);
     }
     int n = sctp_recvmsg(sock, incoming, BUFF_SIZE, NULL, 0,0,0);
     if(n < 0) {
-        printf("Error getting greeting\n");
+        plog(INFO, "Error getting greeting\n");
         close(sock);
         exit(EXIT_FAILURE);
     } else if (n > 0){
         if(incoming[0] == '+'){
-            printf("%sGREETINGS\n", incoming);
+            plog(INFO, "%sGREETINGS\n", incoming);
         }
     }
 
-    printf("Please enter Password to login.\nPassword: \n");
+    plog(INFO, "Please enter Password to login.\nPassword: \n");
     while(!status) {
         status = get_authentication(sock,incoming, out);
 
     }
-    printf("%s", help_message);
+    plog(INFO, "%s", help_message);
     while(1) {
         parse_command(sock, incoming, out);
     }
