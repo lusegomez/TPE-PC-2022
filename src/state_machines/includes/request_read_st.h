@@ -7,6 +7,8 @@
 #include "../../includes/selector.h"
 #include "../../parsers/includes/request_read_parser.h"
 #include "../../includes/socks5.h"
+#include "../../utils/includes/logger.h"
+#include "../../utils/includes/util.h"
 
 
 #define SUCCEDED                          0x00

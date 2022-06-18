@@ -43,6 +43,9 @@ struct socks5 {
     struct copy_st * copy;
     bool closing;
 
+    bool sniffed;
+    bool isPop;
+
 
     struct state_machine stm;
 

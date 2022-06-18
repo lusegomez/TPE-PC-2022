@@ -3,6 +3,7 @@
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
+
 //Check if socket connection was closed
 bool is_socket_closed(int fd){
     int error = 0;
@@ -28,7 +29,9 @@ unsigned copy_read(struct selector_key * key){
     if(ret > 0) {
         add_bytes(ret);
         buffer_write_adv(buff, ret);
-
+        if(key->fd == sock->client_fd && !sock->sniffed && sock->isPop && get_disector()) {
+            //TODO: parsear pop3 y extraer user y pass
+        }
         if(!buffer_can_write(buff)){
             //TENGO QUE SACAR UN INTERES SIN SACAR LOS OTROS
             if(selector_remove_interest(key->s, key->fd, OP_READ) != SELECTOR_SUCCESS){

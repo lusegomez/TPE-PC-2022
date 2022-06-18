@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "./includes/util.h"
 
 const char *
 printFamily(struct addrinfo *aip)
@@ -198,4 +199,15 @@ sockaddr_to_human(char *buff, const size_t buffsize,
     buff[buffsize - 1] = 0;
 
     return buff;
+}
+
+//function that returns date and time
+char *getDateTime() {
+    time_t rawtime;
+    struct tm * timeinfo;
+    char *dateTime = malloc(sizeof(char) * 20);
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(dateTime, 20, "%d-%m-%Y %H:%M:%S", timeinfo);
+    return dateTime;
 }

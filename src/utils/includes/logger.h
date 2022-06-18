@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "util.h"
 
 /* 
 *  Macros y funciones simples para log de errores.

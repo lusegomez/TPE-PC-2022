@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "./includes/metrics.h"
 
@@ -47,6 +48,7 @@ struct admin_data *
 init_admin_data(void) {
     adminData = malloc(sizeof(struct admin_data));
     memset(adminData,0,sizeof(struct admin_data));
+    adminData->disector = true;
     if (adminData == NULL) {
         perror("Error initializing admin data");
         exit(EXIT_FAILURE);

@@ -18,7 +18,7 @@ char * levelDescription(LOG_LEVEL level) {
 
 void plog(LOG_LEVEL level, char * fmt, ...) {
     if(level >= current_level) {
-        fprintf (stderr, "%s: ", levelDescription(level)); 
+        fprintf (stderr, "[%s] %s: ", getDateTime(), levelDescription(level));
         va_list args;
         va_start(args, fmt);
         vfprintf(stderr, fmt, args);
