@@ -64,7 +64,6 @@ unsigned request_read(struct selector_key * key) {
     ssize_t ret = recv(key->fd, pointer, nbytes, 0);
     unsigned state;
     if(ret > 0) {
-        add_bytes(ret);
         buffer_write_adv(&sock->read_buffer, ret);
         enum request_read_state ret_state = consume_request(&sock->read_buffer, rp);
         if(ret_state == request_reading_end){
@@ -130,7 +129,6 @@ unsigned response_write(struct selector_key * key){
     uint8_t ret_state = COPY;
     ssize_t ret = send(key->fd, pointer, n, MSG_NOSIGNAL);
     if(ret > 0) {
-        add_bytes(ret);
         buffer_read_adv(&sock->write_buffer, n);
         if(!buffer_can_read(&sock->write_buffer)){
             if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){

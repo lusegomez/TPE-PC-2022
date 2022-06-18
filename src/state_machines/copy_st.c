@@ -70,7 +70,6 @@ unsigned copy_write(struct selector_key * key){
     uint8_t * prt = buffer_read_ptr(buff, &nbytes);
     ssize_t ret = send(key->fd, prt, nbytes, MSG_NOSIGNAL);
     if(ret > 0) {
-        add_bytes(ret);
         buffer_read_adv(buff, ret);
         if(!buffer_can_read(buff)){
             if(selector_remove_interest(key->s, key->fd, OP_WRITE) != SELECTOR_SUCCESS){
