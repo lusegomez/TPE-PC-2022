@@ -424,7 +424,6 @@ parse_command(struct selector_key * key) {
             pass = strtok(NULL, ":");
             if (user == NULL || pass == NULL || strtok(NULL, ":")) {
                 message = "-6 3\n";
-
             } else {
                 struct users new_user;
                 new_user.name = malloc(strlen(user) + 1);

@@ -12,6 +12,7 @@ static struct users * users = NULL;
 
 int add_user(struct users * usr){
     if(total_users == MAX_USERS){
+        plog(ERRORR, "Error adding user %s, max users reached", usr->name);
         return -2;
     }
 
