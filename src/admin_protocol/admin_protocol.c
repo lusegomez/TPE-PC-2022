@@ -424,6 +424,7 @@ parse_command(struct selector_key * key) {
             pass = strtok(NULL, ":");
             if (user == NULL || pass == NULL || strtok(NULL, ":")) {
                 message = "-6 3\n";
+                plog(ERRORR, "%s\n", "Wrong arguments sent to add user");
             } else {
                 struct users new_user;
                 new_user.name = malloc(strlen(user) + 1);
