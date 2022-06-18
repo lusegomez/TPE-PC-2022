@@ -90,7 +90,13 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     }
     char arg[BUFF_SIZE] = {0};
     if(command_index == DISECTOR_ACTIVATION || command_index == ADD_USER || command_index == DELETE_USER ){
-        strcpy(arg,strtok(NULL, " "));
+        char * aux = strtok(NULL, " ");
+        if (aux == NULL) {
+            plog(DEBUG, "-ERR \n");
+            plog(INFO, "No arguments!\n");
+            return -1;
+        }
+        strcpy(arg,aux);
         if (arg[0] != 0) {
             if(strtok(NULL, " ")) {
                 plog(DEBUG, "-ERR \n");
