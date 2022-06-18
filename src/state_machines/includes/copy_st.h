@@ -11,6 +11,7 @@
 
 enum pop3_state {
     POP3_READING_COMMAND,
+    POP3_CHECK_COMMAND,
     POP3_READING_USER,
     POP3_READING_PASSWORD,
     POP3_PARSER_DONE,
@@ -22,6 +23,13 @@ struct pop3_st {
     bool user_done;
     char pass[255];
     bool pass_done;
+    char cmd[50];
+    int cmd_index;
+
+    int user_index;
+    int pass_index;
+
+    bool clean_cmd;
 };
 
 unsigned copy_read(struct selector_key * key);

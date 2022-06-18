@@ -3,11 +3,6 @@
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
-char cmd[4] = {0};
-int cmd_index = 0;
-
-int user_index = 0;
-int pass_index = 0;
 
 //Check if socket connection was closed
 bool is_socket_closed(int fd){
@@ -28,17 +23,24 @@ unsigned init_pop3_parsers(struct selector_key * key){
         }
     }
     sock->pop3->pop3_state = POP3_READING_COMMAND;
+    sock->pop3->user_done = false;
+    sock->pop3->pass_done = false;
+    sock->pop3->cmd_index = 0;
+
+    sock->pop3->user_index = 0;
+    sock->pop3->pass_index = 0;
+    sock->pop3->clean_cmd = true;
     memset(sock->pop3->user, 0, 255);
     memset(sock->pop3->pass, 0, 255);
     return COPY;
 }
 
-void to_upper_case(char * str, int n){
+void to_upper_case(char * str, int n, struct socks5 * sock){
     int i = 0;
-    while(str[i] != '\0' && i < n && cmd_index < 4){
-        if(cmd[cmd_index] == '\0' && isalpha(str[i])){
-            cmd[cmd_index] = toupper(str[i]);
-            cmd_index++;
+    while(str[i] != '\0' && i < n && sock->pop3->cmd_index < 4){
+        if(sock->pop3->cmd[sock->pop3->cmd_index] == '\0' && isalpha(str[i])){
+            sock->pop3->cmd[sock->pop3->cmd_index] = toupper(str[i]);
+            sock->pop3->cmd_index++;
         }
         i++;
     }
@@ -53,57 +55,82 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
     while (i < n && !sock->sniffed) {
         switch (sock->pop3->pop3_state) {
             case POP3_READING_COMMAND:
-                to_upper_case((char*) ptr, 4);
-                if (ptr[i] == ' ' && !strncmp(cmd, "USER", 4)) {
-                    sock->pop3->pop3_state = POP3_READING_USER;
-                    //reset cmd
-                    memset(cmd, 0, 4);
-                    cmd_index = 0;
-                    i++;
-                }else if (ptr[i] == ' ' && !strncmp(cmd, "PASS", 4)) {
-                    sock->pop3->pop3_state = POP3_READING_PASSWORD;
-                    memset(cmd, 0, 4);
-                    cmd_index = 0;
-                    i++;
+                if(ptr[i] == ' '){
+                    sock->pop3->pop3_state = POP3_CHECK_COMMAND;
+                    sock->pop3->cmd[sock->pop3->cmd_index] = '\0';
                 } else {
+                    if(sock->pop3->cmd_index < 49){
+                        sock->pop3->cmd[sock->pop3->cmd_index] = toupper(ptr[i]);
+                        sock->pop3->cmd_index++;
+                    }
                     i++;
                 }
                 break;
-            case POP3_READING_USER:
-                if (ptr[i] == '\r') {
+            case POP3_CHECK_COMMAND:
+                if(strcmp(sock->pop3->cmd, "USER") == 0){
+                    sock->pop3->pop3_state = POP3_READING_USER;
+                    sock->pop3->user_index = 0;
+
+                } else if(strcmp(sock->pop3->cmd, "PASS") == 0){
+                    sock->pop3->pop3_state = POP3_READING_PASSWORD;
+                    sock->pop3->pass_index = 0;
+                } else if(ptr[i] == '\r') {
                     sock->pop3->pop3_state = POP3_READING_COMMAND;
+                    i++;
+                }
+                sock->pop3->cmd_index = 0;
+                sock->pop3->cmd[0] = '\0';
+                i++;
+                break;
+            case POP3_READING_USER:
+                if(ptr[i] == '\r'){
+                    sock->pop3->pop3_state = POP3_READING_COMMAND;
+                    sock->pop3->cmd_index = 0;
+                    sock->pop3->cmd[0] = '\0';
                     sock->pop3->user_done = true;
-                    sock->pop3->user[user_index] = '\0';
-                    user_index = 0;
+                    sock->pop3->user[sock->pop3->user_index] = '\0';
+                    i++;
                     i++;
                 } else {
-                    sock->pop3->user[user_index++] = ptr[i];
+                    if(sock->pop3->user_index < 255){
+                        sock->pop3->user[sock->pop3->user_index] = ptr[i];
+                        sock->pop3->user_index++;
+                    }
                     i++;
                 }
                 break;
             case POP3_READING_PASSWORD:
-                if (ptr[i] == '\r') {
+                if(ptr[i] == '\r'){
                     sock->pop3->pop3_state = POP3_PARSER_DONE;
+                    sock->pop3->cmd_index = 0;
+                    sock->pop3->cmd[0] = '\0';
                     sock->pop3->pass_done = true;
-                    sock->pop3->pass[pass_index] = '\0';
-                    pass_index = 0;
+                    sock->pop3->pass[sock->pop3->pass_index] = '\0';
                     i++;
                 } else {
-                    sock->pop3->pass[pass_index++] = ptr[i];
+                    if(sock->pop3->pass_index < 255){
+                        sock->pop3->pass[sock->pop3->pass_index] = ptr[i];
+                        sock->pop3->pass_index++;
+                    }
                     i++;
                 }
                 break;
             case POP3_PARSER_DONE:
-                sock->sniffed = true;
-                plog(INFO, "Sniffed POP3 user \"%s\" with pass \"%s\"", sock->pop3->user, sock->pop3->pass);
+                if(sock->pop3->user_done && sock->pop3->pass_done){
+                    sock->sniffed = true;
+                    sock->pop3->pop3_state = POP3_READING_COMMAND;
+                    sock->pop3->cmd_index = 0;
+                    sock->pop3->cmd[0] = '\0';
+                    sock->pop3->user_index = 0;
+                    sock->pop3->pass_index = 0;
+                    plog(INFO, "Sniffed POP3 user \"%s\" with pass \"%s\"", sock->pop3->user, sock->pop3->pass);
+                }
                 i++;
                 break;
 
         }
 
     }
-    memset(cmd, 0, 4);
-    cmd_index = 0;
 }
 
 unsigned copy_read(struct selector_key * key){
@@ -122,18 +149,15 @@ unsigned copy_read(struct selector_key * key){
     if(ret > 0) {
         add_bytes(ret);
         buffer_write_adv(buff, ret);
-        if(key->fd == sock->client_fd && !sock->sniffed && sock->isPop && get_disector()) {
+        if(key->fd == sock->client_fd && sock->isPop && get_disector()) {
             if(sock->pop3 == NULL){
                 if(init_pop3_parsers(key) == ERROR) {
                     return ERROR;
                 }
             }
             parse_pop3(key, buff);
-            if(sock->sniffed) {
-                sock->pop3->pop3_state = POP3_READING_COMMAND;
-                sock->sniffed = false;
+            sock->sniffed = false;
 
-            }
 
 
             //TODO: parsear pop3 y extraer user y pass
