@@ -423,7 +423,7 @@ parse_command(struct selector_key * key) {
             user = strtok(arg, ":");
             pass = strtok(NULL, ":");
             if (user == NULL || pass == NULL || strtok(NULL, ":")) {
-                message = "-6 \n";
+                message = "-6 3\n";
 
             } else {
                 struct users new_user;
@@ -431,8 +431,15 @@ parse_command(struct selector_key * key) {
                 strcpy(new_user.name, user);
                 new_user.pass = malloc(strlen(pass) + 1);
                 strcpy(new_user.pass, pass);
-                if(add_user(&new_user) == -1){
-                    message = "-6 \n";
+                int status = add_user(&new_user);
+                if(status == -1){
+                    message = "-6 0\n";
+                } else if (status == -2) {
+                    message = "-6 2\n";
+                } else if (status == -3) {
+                    message = "-6 1\n";
+                } else if (status == -4) {
+                    message = "-6 3\n";
                 } else {
                     message = "+6 \n";
                 }

@@ -12,7 +12,7 @@ static struct users * users = NULL;
 
 int add_user(struct users * usr){
     if(total_users == MAX_USERS){
-        return -1;
+        return -2;
     }
 
     if(usr->name[0] == 0 || usr->pass[0] == 0){
@@ -29,8 +29,8 @@ int add_user(struct users * usr){
     }
     for(int i = 0; i < total_users; i++){
         if(strcmp(users[i].name, usr->name) == 0) {
-            plog(ERRORR, "Error adding user %s", usr->name);
-            return -1;
+            plog(ERRORR, "Error adding user %s, user already exists", usr->name);
+            return -3;
         }
     }
 
@@ -39,13 +39,13 @@ int add_user(struct users * usr){
     size_t pass_len = strlen(usr->pass) + 1;
     for(int j = 0; j < pass_len; j++){
         if(usr->pass[j] == ':'){
-            plog(ERRORR, "Error adding user %s", usr->name);
-            return -1;
+            plog(ERRORR, "Error adding user %s, contains ':' in password", usr->name);
+            return -4;
         }
     }
     if(name_len > MAX_USER_NAME_LEN || pass_len > MAX_USER_PASS_LEN){
-        plog(ERRORR, "Error adding user %s", usr->name);
-        return -1;
+        plog(ERRORR, "Error adding user %s, name or password too long", usr->name);
+        return -4;
     }
     users[total_users].name = malloc(name_len);
     users[total_users].pass = malloc(pass_len);
