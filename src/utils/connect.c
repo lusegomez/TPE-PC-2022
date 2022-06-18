@@ -17,6 +17,12 @@
 #define FQDN 0x03
 #define IPV6 0x04
 
+#define POP3PORT 110
+
+#define INET_ADDRSTRLEN 16
+#define INET6_ADDRSTRLEN 46
+
+
 unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     struct socks5 * sock = ATTACHMENT(key);
     unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
@@ -111,6 +117,7 @@ finally:
         close(sock->origin_fd);
         sock->origin_fd = -1;
     }
+    sock->request_read->status = state;
     return state;
 }   
 unsigned connect_origin_ipv6(struct connect * conn, struct selector_key *key){
@@ -209,6 +216,25 @@ unsigned connect_init(struct selector_key *key){
         if(selector_set_interest(key->s, sock->client_fd, OP_WRITE) != SELECTOR_SUCCESS){
             return ERROR;
         }
+    }
+    char buff[INET6_ADDRSTRLEN]={0};
+    if(rqst_st->req_parser->atype != FQDN){
+        inet_ntop(rqst_st->req_parser->atype == IPV4 ? AF_INET : AF_INET6, rqst_st->req_parser->destaddr, buff, rqst_st->req_parser->atype == IPV4 ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
+    }
+    if ((((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1]) == POP3PORT){
+        sock->isPop = true;
+    }
+
+    if(rqst_st->status == SUCCEDED){
+        plog(INFO, "%s accessed address %s port %d",
+             sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
+             rqst_st->req_parser->atype == FQDN ? (char *)rqst_st->req_parser->destaddr : buff,
+             ((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1]);
+    } else {
+        plog(INFO, "%s tried to access address %s port %d but failed",
+             sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
+             rqst_st->req_parser->atype == FQDN ? (char *)rqst_st->req_parser->destaddr : buff,
+             ((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1]);
     }
     return ret_state;
 }

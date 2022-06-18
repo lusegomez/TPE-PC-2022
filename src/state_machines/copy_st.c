@@ -73,6 +73,7 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
                 if (ptr[i] == '\r') {
                     sock->pop3->pop3_state = POP3_READING_COMMAND;
                     sock->pop3->user_done = true;
+                    sock->pop3->user[user_index] = '\0';
                     user_index = 0;
                     i++;
                 } else {
@@ -84,6 +85,7 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
                 if (ptr[i] == '\r') {
                     sock->pop3->pop3_state = POP3_PARSER_DONE;
                     sock->pop3->pass_done = true;
+                    sock->pop3->pass[pass_index] = '\0';
                     pass_index = 0;
                     i++;
                 } else {
@@ -125,6 +127,12 @@ unsigned copy_read(struct selector_key * key){
                 }
             }
             parse_pop3(key, buff);
+            if(sock->sniffed) {
+                sock->pop3->pop3_state = POP3_READING_COMMAND;
+                sock->sniffed = false;
+
+            }
+
 
             //TODO: parsear pop3 y extraer user y pass
         }

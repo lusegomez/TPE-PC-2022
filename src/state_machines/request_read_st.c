@@ -13,17 +13,11 @@
 #define FQDN 0x03
 #define IPV6 0x04
 
-#define POP3PORT 110
-
-#define INET_ADDRSTRLEN 16
-#define INET6_ADDRSTRLEN 46
-
 #define SOCKSVERSION 0x05
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
 #define RESPLEN 10
-#define IPV4 0x01
 
 
 void response(struct socks5 * sock){
@@ -102,18 +96,6 @@ unsigned request_read(struct selector_key * key) {
 
         }
     }
-    char buff[INET6_ADDRSTRLEN]={0};
-    if(rp->atype != FQDN){
-        inet_ntop(rp->atype == IPV4 ? AF_INET : AF_INET6, rp->destaddr, buff, rp->atype == IPV4 ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
-    }
-    if ((((uint16_t)rp->port[0] << 8) | rp->port[1]) == POP3PORT){
-        sock->isPop = true;
-    }
-    plog(INFO, "%s accessed address %s port %d",
-         sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
-         rp->atype == FQDN ? (char *)rp->destaddr : buff,
-         ((uint16_t)rp->port[0] << 8) | rp->port[1]);
-
     return rp->atype == FQDN ? DNS_QUERY : connect_init(key);
     finally:
     switch (rp->state) {

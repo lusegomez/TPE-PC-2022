@@ -70,6 +70,13 @@ void dns_query_init(const unsigned state, struct selector_key *key){
 
 unsigned dns_query_close(struct selector_key * key){
     struct socks5 * sock = ATTACHMENT(key);
-    return sock->origin_resolution == NULL ? ERROR : connect_init(key);
+    if(sock->origin_resolution == NULL) {
+        plog(INFO, "%s tried to access address %s port %d but failed (Unresolved fqdn)",
+             sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
+             (char *)sock->request_read->req_parser->destaddr,
+             ((uint16_t)sock->request_read->req_parser->port[0] << 8) | sock->request_read->req_parser->port[1]);
+        return ERROR;
+    }
+    return connect_init(key);
 }
 
