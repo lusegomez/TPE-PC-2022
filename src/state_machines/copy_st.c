@@ -3,6 +3,11 @@
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
 
+char cmd[4] = {0};
+int cmd_index = 0;
+
+int user_index = 0;
+int pass_index = 0;
 
 //Check if socket connection was closed
 bool is_socket_closed(int fd){
@@ -28,11 +33,13 @@ unsigned init_pop3_parsers(struct selector_key * key){
     return COPY;
 }
 
-//converts a string to upper case and returns it
-void to_upper_case(char * dst, char * str, int n){
+void to_upper_case(char * str, int n){
     int i = 0;
-    while(str[i] != '\0' && i < n){
-        dst[i] = toupper(str[i]);
+    while(str[i] != '\0' && i < n && cmd_index < 4){
+        if(cmd[cmd_index] == '\0' && isalpha(str[i])){
+            cmd[cmd_index] = toupper(str[i]);
+            cmd_index++;
+        }
         i++;
     }
 }
@@ -43,18 +50,20 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
     size_t n = 0;
     uint8_t *ptr = buffer_read_ptr(buffer, &n);
     int i = 0;
-    int user_index = 0;
-    int pass_index = 0;
-    char cmd[4] = {0};
     while (i < n && !sock->sniffed) {
         switch (sock->pop3->pop3_state) {
             case POP3_READING_COMMAND:
-                to_upper_case(cmd,(char*) ptr, 4);
+                to_upper_case((char*) ptr, 4);
                 if (ptr[i] == ' ' && !strncmp(cmd, "USER", 4)) {
                     sock->pop3->pop3_state = POP3_READING_USER;
+                    //reset cmd
+                    memset(cmd, 0, 4);
+                    cmd_index = 0;
                     i++;
                 }else if (ptr[i] == ' ' && !strncmp(cmd, "PASS", 4)) {
                     sock->pop3->pop3_state = POP3_READING_PASSWORD;
+                    memset(cmd, 0, 4);
+                    cmd_index = 0;
                     i++;
                 } else {
                     i++;
@@ -64,6 +73,7 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
                 if (ptr[i] == '\r') {
                     sock->pop3->pop3_state = POP3_READING_COMMAND;
                     sock->pop3->user_done = true;
+                    user_index = 0;
                     i++;
                 } else {
                     sock->pop3->user[user_index++] = ptr[i];
@@ -74,6 +84,7 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
                 if (ptr[i] == '\r') {
                     sock->pop3->pop3_state = POP3_PARSER_DONE;
                     sock->pop3->pass_done = true;
+                    pass_index = 0;
                     i++;
                 } else {
                     sock->pop3->pass[pass_index++] = ptr[i];
