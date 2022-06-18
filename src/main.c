@@ -42,7 +42,7 @@ sigterm_handler(const int signal) {
 
 int
 main(const int argc, const char **argv) {
-    plog(INFO, "%s", "Iniciando proxy...");
+    plog(INFO, "%s", "Starting proxy...");
     parse_args(argc, (char **)argv, &args);
     //for every user in the list, add them to the user list
     for(int i = 0; i < args.nusers; i++) {
