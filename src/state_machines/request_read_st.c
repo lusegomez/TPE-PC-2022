@@ -86,6 +86,8 @@ unsigned request_read(struct selector_key * key) {
                 case request_reading_error:
                     state = GENERAL_SOCKS_SERVER_FAILURE;
                     break;
+                default:
+                    break;
             }
              sock->request_read->status = state;
 
@@ -110,6 +112,8 @@ unsigned request_read(struct selector_key * key) {
             break;
         case request_reading_error:
             state = GENERAL_SOCKS_SERVER_FAILURE;
+            break;
+        default:
             break;
     }
     sock->request_read->status = state;

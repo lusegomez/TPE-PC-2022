@@ -26,7 +26,7 @@ void hello_init(const unsigned state, struct selector_key *key) {
     st->selected_method = -1;
     st->hello_parser = malloc(sizeof(struct hello_parser));
     hello_parser_init(st->hello_parser);
-    log(DEBUG, "%s: %s:%d", "Hello parser inicializado", __FILE__, __LINE__);
+    plog(DEBUG, "%s: %s:%d", "Hello parser inicializado", __FILE__, __LINE__);
 }
 
 void hello_reset(struct hello_st * hello){
@@ -34,10 +34,8 @@ void hello_reset(struct hello_st * hello){
     if(hello->hello_parser != NULL && hello->hello_parser->methods != NULL){
         free(hello->hello_parser->methods);
         free(hello->hello_parser);
+        plog(DEBUG, "%s: %s:%d", "Se liberaron recursos del hello parser", __FILE__, __LINE__);
     }
-
-
-
 }
 
 unsigned hello_read(struct selector_key * key) {
@@ -68,6 +66,7 @@ unsigned hello_read(struct selector_key * key) {
                 }
             }
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "No se pudo setear interes de escritura", __FILE__, __LINE__);
                 goto finally;
             }
             hello_response(&sock->write_buffer, sock->hello);
@@ -76,6 +75,7 @@ unsigned hello_read(struct selector_key * key) {
 
             sock->hello->selected_method = NOMETHOD;
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "No se pudo setear interes de escritura", __FILE__, __LINE__);
                 goto finally;
             }
         }
@@ -85,28 +85,16 @@ unsigned hello_read(struct selector_key * key) {
     sock->hello->selected_method = NOMETHOD;
     hello_response(&sock->write_buffer, sock->hello);
     return ERROR;
-//    for(int i = 0; i < ret; i++) {
-//        const struct parser_event * state = parser_feed(sock->hello->ver_parser, pointer[i]);
-//        if(state->type == STRING_CMP_EQ) {
-//            if(selector_set_interest(key->s, sock->client_fd, OP_WRITE) != SELECTOR_SUCCESS) {
-//                return ERROR;
-//            }
-//        } else if (state->type == STRING_CMP_NEQ){
-//            return ERROR;
-//        }
-//    }
-//    parser_reset(sock->hello->ver_parser);
-//    buffer_write_adv(&sock->write_buffer, ret);
-
 }
 
 void hello_response(buffer * b, struct hello_st * hello){
     size_t n;
     uint8_t * pointer = buffer_write_ptr(b,&n);
-    //TODO: checkear que se puedan escribir 2 bytes
-    pointer[0] = SOCKSVERSION;
-    pointer[1] = hello->selected_method;
-    buffer_write_adv(b, HELLORESPONSE);
+    if(n >= 2){
+        pointer[0] = SOCKSVERSION;
+        pointer[1] = hello->selected_method;
+        buffer_write_adv(b, HELLORESPONSE);
+    }
 }
 
 
@@ -121,6 +109,7 @@ unsigned hello_write(struct selector_key * key) {
         buffer_read_adv(&sock->write_buffer, n);
         if(!buffer_can_read(&sock->write_buffer)){
             if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "No se pudo setear interes de lectura", __FILE__, __LINE__);
                 goto finally;
             }
             if(sock->hello->selected_method == AUTH) {

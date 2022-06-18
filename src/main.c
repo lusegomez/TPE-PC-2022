@@ -42,13 +42,13 @@ sigterm_handler(const int signal) {
 
 int
 main(const int argc, const char **argv) {
-    log(INFO, "%s", "Iniciando proxy...");
+    plog(INFO, "%s", "Iniciando proxy...");
     parse_args(argc, (char **)argv, &args);
     //for every user in the list, add them to the user list
     if(args.users[0].name != 0) {
-        for(int i = 0; i < N(args.users); i++) {
+        for(int i = 0; i < (int)N(args.users); i++) {
             if(add_user(&args.users[i]) == -1){
-                log(ERRORR, "Error adding user %s\n", args.users[i].name);
+                plog(ERRORR, "Error adding user %s\n", args.users[i].name);
             }
         }
     }
@@ -71,27 +71,27 @@ main(const int argc, const char **argv) {
 
     int error_ipv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
     if(error_ipv4 == -1) {
-        log(INFO, "%s ", "Error al crear socket IPv4");
+        plog(INFO, "%s ", "Error al crear socket IPv4");
     }
     int error_ipv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
     if(error_ipv6 == -1) {
-        log(INFO, "%s ", "Error al crear socket IPv6");
+        plog(INFO, "%s ", "Error al crear socket IPv6");
     }
     int error_mngt_ipv4 = create_passive_socket_mngt_ipv4(&passive_socket_mngt_ipv4, args);
     if(error_mngt_ipv4 == -1){
-        log(INFO, "%s ", "Error al crear socket  SCTP IPv4");
+        plog(INFO, "%s ", "Error al crear socket  SCTP IPv4");
     }
     int error_mngt_ipv6 = create_passive_socket_mngt_ipv6(&passive_socket_mngt_ipv6, args);
     if(error_mngt_ipv6 == -1){
-        log(INFO, "%s ", "Error al crear socket  SCTP IPv6");
+        plog(INFO, "%s ", "Error al crear socket  SCTP IPv6");
     }
     if ((error_ipv4 == -1 && error_ipv6 == -1) || (error_mngt_ipv4 == -1 && error_mngt_ipv6 == -1))
     {
         err_msg = "No se pudieron crear los sockets pasivos";
         goto finally;
     }
-    log(INFO, "%s %d", "[PROXY] Listening on TCP port", args.socks_port);
-    log(INFO, "%s %d ", "[PROXY] Listening on SCTP port", args.mng_port);
+    plog(INFO, "%s %d", "[PROXY] Listening on TCP port", args.socks_port);
+    plog(INFO, "%s %d ", "[PROXY] Listening on SCTP port", args.mng_port);
 
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
@@ -177,7 +177,7 @@ main(const int argc, const char **argv) {
     int ret = 0;
 finally:
     if(ss != SELECTOR_SUCCESS) {
-        log(ERROR, "%s: %s", err_msg, ss == SELECTOR_IO? strerror(errno) : selector_error(ss));
+        plog(ERRORR, "%s: %s", err_msg, ss == SELECTOR_IO? strerror(errno) : selector_error(ss));
         /*
         fprintf(stderr, "%s: %s\n", (err_msg == NULL) ? "": err_msg,
                                   ss == SELECTOR_IO

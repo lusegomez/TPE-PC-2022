@@ -16,7 +16,7 @@ char * levelDescription(LOG_LEVEL level) {
 }
 
 
-void log(LOG_LEVEL level, char * fmt, ...) {
+void plog(LOG_LEVEL level, char * fmt, ...) {
     if(level >= current_level) {
         fprintf (stderr, "%s: ", levelDescription(level)); 
         va_list args;

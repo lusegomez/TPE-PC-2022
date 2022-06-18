@@ -71,26 +71,9 @@ typedef struct admin
 } admin;
 
 
-static unsigned 
-greet(struct selector_key *key);
-
-static unsigned
-recieve_from_client(struct selector_key * key);
 
 //static void
 //hop(const unsigned state, struct selector_key *key);
-
-static unsigned
-authenticate(struct selector_key * key);
-
-static unsigned
-send_to_client(struct selector_key * key);
-
-static unsigned
-parse_command(struct selector_key * key);
-
-static unsigned
-command_response(struct selector_key * key);
 
 struct admin *
 new_admin(int client_fd);
@@ -103,11 +86,6 @@ void admin_block  (struct selector_key *key);
 
 void admin_close  (struct selector_key *key);
 
-static void
-admin_done  (struct selector_key *key);
-
-static void
-admin_destroy(struct admin * admin);
 
 static const struct fd_handler admin_handler = {
         .handle_read   = admin_read,

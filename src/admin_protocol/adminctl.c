@@ -63,10 +63,11 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     memset(out_buffer, 0, BUFF_SIZE);
     memset(in_buff, 0, BUFF_SIZE);
     fgets(out_buffer, BUFF_SIZE, stdin);
+    /*      strlen siempre devuelve >=0
     if (strlen(out_buffer) < 0) {
         return -1;
-    }
-    char args[100] = {0};
+    }*/
+    //char args[100] = {0};
     out_buffer[strlen(out_buffer) - 1] = '\0';
     char * token = strtok(out_buffer, " ");
     char * command = token;
@@ -93,7 +94,7 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
             }
         }
     } else if( command_index == 1){
-        printf(help_message);
+        printf("%s", help_message);
         return 1;
     } else {
         if(strtok(NULL, " ")) {
@@ -157,8 +158,8 @@ get_authentication(int sock,char * in_buffer,char * out_buffer) {
     memset(out_buffer, 0, BUFF_SIZE);
     fgets(out_buffer, BUFF_SIZE, stdin);
     strtok(out_buffer, "\n");
-    if (n = sctp_sendmsg(sock, out_buffer, strlen(out_buffer),
-                         NULL, 0, 0, 0, 0, 0, 0) < 0) {
+    if ((n = sctp_sendmsg(sock, out_buffer, strlen(out_buffer),
+                         NULL, 0, 0, 0, 0, 0, 0)) < 0) {
         printf("ERROR\n");
         return -1;
     }
@@ -217,7 +218,7 @@ main(const int argc, char **argv) {
         status = get_authentication(sock,incoming, out);
 
     }
-    printf(help_message);
+    printf("%s", help_message);
     while(1) {
         parse_command(sock, incoming, out);
     }

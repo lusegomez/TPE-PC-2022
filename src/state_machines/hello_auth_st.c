@@ -11,6 +11,8 @@
 #include "../includes/socks5.h"
 #include "../utils/includes/users.h"
 
+#include "../utils/includes/logger.h"
+
 #define AUTH_VERSION 0x01
 #define AUTH_RESPONSE 2
 #define STATUS_SUCCESS 0x00
@@ -22,6 +24,7 @@ void hello_auth_init(const unsigned state, struct selector_key *key){
     struct hello_auth_st * st = ATTACHMENT(key)->hello_auth;
     st->hello_auth_parser = malloc(sizeof(struct hello_auth_parser));
     hello_auth_parser_init(st->hello_auth_parser);
+    plog(DEBUG, "%s: %s:%d", "Hello auth parser inicializado", __FILE__, __LINE__);
 
 }
 
@@ -29,6 +32,7 @@ void hello_auth_reset(struct hello_auth_st * ha){
     ha->status = -1;
     if(ha->hello_auth_parser != NULL){
         free(ha->hello_auth_parser);
+        plog(DEBUG, "%s: %s:%d", "Se liberaron recursos del hello auth parser", __FILE__, __LINE__);
     }
 }
 
@@ -56,12 +60,14 @@ unsigned hello_auth_read(struct selector_key * key){
                 sock->hello_auth->status = STATUS_FAILURE;
             }
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "No se pudo setear interes de escritura", __FILE__, __LINE__);
                 goto finally;
             }   
             hello_auth_response(&sock->write_buffer, sock->hello_auth); 
         } else if(state == hello_auth_error) {
             hello_auth_response(&sock->write_buffer, sock->hello_auth); 
             if(selector_set_interest_key(key, OP_WRITE) != SELECTOR_SUCCESS){
+                plog(ERRORR, "%s", "No se pudo setear interes de escritura", __FILE__, __LINE__);
                 goto finally;
             }
         }
@@ -85,6 +91,7 @@ unsigned hello_auth_write(struct selector_key * key) {
         if(!buffer_can_read(&sock->write_buffer)){
             if(sock->hello_auth->status == STATUS_SUCCESS){
                 if(selector_set_interest_key(key, OP_READ) != SELECTOR_SUCCESS){
+                    plog(ERRORR, "%s", "No se pudo setear interes de lectura", __FILE__, __LINE__);
                     goto finally;
                 }
                 return REQUEST_READING;

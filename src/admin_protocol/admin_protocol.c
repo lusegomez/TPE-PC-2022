@@ -1,6 +1,15 @@
 #include "./includes/admin_protocol.h"
 
 
+static unsigned greet(struct selector_key *key);
+static unsigned authenticate(struct selector_key * key);
+static unsigned parse_command(struct selector_key * key);
+static unsigned command_response(struct selector_key * key);
+static unsigned recieve_from_client(struct selector_key * key);
+static unsigned send_to_client(struct selector_key * key);
+static void admin_done  (struct selector_key *key);
+static void admin_destroy(struct admin * admin);
+
 
 static const struct state_definition client_statbl[] =
         {
@@ -283,9 +292,9 @@ send_to_client(struct selector_key * key) {
     size_t size;
     int n;
     uint8_t * ptr = buffer_read_ptr(buff, &size);
-     if(n = sctp_sendmsg(key->fd, ptr , size,
-                               NULL, 0, 0, 0, 0, 0, 0) < 0) {
-         log(ERRORR, "%s\n", "Error sending message to client");
+     if((n = sctp_sendmsg(key->fd, ptr , size,
+                               NULL, 0, 0, 0, 0, 0, 0)) < 0) {
+         plog(ERRORR, "%s\n", "Error sending message to client");
          return -1;
      }
     buffer_read_adv(buff, size);
@@ -313,7 +322,7 @@ recieve_from_client(struct selector_key * key) {
 static unsigned
 parse_command(struct selector_key * key) {
 
-    char buf[2048] = {0};
+    //char buf[2048] = {0};
     admin *admin = ADMIN_ATTACHMENT(key);
     buffer *buff = &admin->read_buffer;
     int bytes = recieve_from_client(key);
@@ -357,7 +366,7 @@ parse_command(struct selector_key * key) {
         return COMMANDS;
     }
     char *message = malloc(255);
-    bool disector_ret;
+    //bool disector_ret;
 
     switch (comando) {
 
@@ -385,9 +394,11 @@ parse_command(struct selector_key * key) {
         case DISECTOR_ACTIVATION:
             message = "+4 \n";
             if(*arg == '+'){
-                disector_ret = disector_activation(true);
+                disector_activation(true);
+                message = "+4 \n+";
             } else if(*arg == '-') {
-                disector_ret = disector_activation(false);
+                disector_activation(false);
+                message = "+4 \n-";
             } else {
                 message = "-4 \n";
             }

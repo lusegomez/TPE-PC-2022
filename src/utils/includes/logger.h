@@ -22,7 +22,7 @@ void setLogLevel(LOG_LEVEL newLevel);
 char * levelDescription(LOG_LEVEL level);
 
 
-void log(LOG_LEVEL level, char * fmt, ...);
+void plog(LOG_LEVEL level, char * fmt, ...);
 /*
 // Debe ser una macro para poder obtener nombre y linea de archivo. 
 #define log(level, fmt, ...)   {if(level >= current_level) {\

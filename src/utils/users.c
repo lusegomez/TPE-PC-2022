@@ -56,6 +56,7 @@ int delete_user(char * username){
             return 0;
         }
     }
+    return 0;
 }
 
 bool can_login(uint8_t * user, uint8_t * pass){
