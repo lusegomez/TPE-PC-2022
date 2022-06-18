@@ -17,12 +17,14 @@ char * levelDescription(LOG_LEVEL level) {
 
 
 void plog(LOG_LEVEL level, char * fmt, ...) {
+    char * time = getDateTime();
     if(level >= current_level) {
-        fprintf (stderr, "[%s] %s: ", getDateTime(), levelDescription(level));
+        fprintf (stderr, "[%s] %s: ",time, levelDescription(level));
         va_list args;
         va_start(args, fmt);
         vfprintf(stderr, fmt, args);
         fprintf(stderr,"\n"); 
-    }   
+    }
+    free(time);
 	if ( level==FATAL) exit(1);
 }
