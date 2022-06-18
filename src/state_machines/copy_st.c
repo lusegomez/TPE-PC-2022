@@ -29,15 +29,12 @@ unsigned init_pop3_parsers(struct selector_key * key){
 }
 
 //converts a string to upper case and returns it
-char * to_upper_case(char * str, int n){
-    char * ptr = str;
+void to_upper_case(char * dst, char * str, int n){
     int i = 0;
-    while(*ptr != '\0' && i < n){
-        *ptr = toupper(*ptr);
-        ptr++;
+    while(str[i] != '\0' && i < n){
+        dst[i] = toupper(str[i]);
         i++;
     }
-    return str;
 }
 
 //parse pop3 user and pass
@@ -48,13 +45,15 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
     int i = 0;
     int user_index = 0;
     int pass_index = 0;
+    char cmd[4] = {0};
     while (i < n && !sock->sniffed) {
         switch (sock->pop3->pop3_state) {
             case POP3_READING_COMMAND:
-                if (ptr[i] == ' ' && !strncmp(to_upper_case((char*) ptr, 4), "USER", 4)) {
+                to_upper_case(cmd,(char*) ptr, 4);
+                if (ptr[i] == ' ' && !strncmp(cmd, "USER", 4)) {
                     sock->pop3->pop3_state = POP3_READING_USER;
                     i++;
-                }else if (ptr[i] == ' ' && !strncmp(to_upper_case((char*) ptr, 4), "PASS", 4)) {
+                }else if (ptr[i] == ' ' && !strncmp(cmd, "PASS", 4)) {
                     sock->pop3->pop3_state = POP3_READING_PASSWORD;
                     i++;
                 } else {
