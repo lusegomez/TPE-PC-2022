@@ -41,6 +41,7 @@ struct socks5 {
     struct connect * connect_origin; 
     struct dns_query_st * dns_query;
     struct copy_st * copy;
+    struct pop3_st * pop3;
     bool closing;
 
     bool sniffed;

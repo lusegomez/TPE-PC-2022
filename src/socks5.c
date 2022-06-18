@@ -87,6 +87,7 @@ static struct socks5 * create_new_sock5(int client_fd) {
     sock->request_read = malloc(sizeof(struct request_read_st));
     sock->dns_query = malloc(sizeof(struct dns_query_st));
     sock->connect_origin = malloc(sizeof(struct connect));
+    sock->pop3 = NULL;
 
 
     memset(sock->hello, 0x00, sizeof(struct hello_st));
@@ -190,6 +191,10 @@ void free_socks5(struct socks5 * sock) {
 
     if(sock->origin_resolution != NULL) {
         freeaddrinfo(sock->origin_resolution);
+    }
+
+    if(sock->pop3 != NULL) {
+        free(sock->pop3);
     }
     free(sock);
 }

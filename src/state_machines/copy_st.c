@@ -12,6 +12,85 @@ bool is_socket_closed(int fd){
     return error != 0;
 }
 
+//Init pop3 user and pass parsers
+unsigned init_pop3_parsers(struct selector_key * key){
+    struct socks5 * sock = ATTACHMENT(key);
+    if(sock->pop3 == NULL){
+        sock->pop3 = calloc(1, sizeof(struct pop3_st));
+        if(sock->pop3 == NULL){
+            plog(ERROR, "Error allocating memory for pop3 parser");
+            return ERROR;
+        }
+    }
+    sock->pop3->pop3_state = POP3_READING_COMMAND;
+    memset(sock->pop3->user, 0, 255);
+    memset(sock->pop3->pass, 0, 255);
+    return COPY;
+}
+
+//converts a string to upper case and returns it
+char * to_upper_case(char * str, int n){
+    char * ptr = str;
+    int i = 0;
+    while(*ptr != '\0' && i < n){
+        *ptr = toupper(*ptr);
+        ptr++;
+        i++;
+    }
+    return str;
+}
+
+//parse pop3 user and pass
+void parse_pop3(struct selector_key * key, buffer * buffer) {
+    struct socks5 *sock = ATTACHMENT(key);
+    size_t n = 0;
+    uint8_t *ptr = buffer_read_ptr(buffer, &n);
+    int i = 0;
+    int user_index = 0;
+    int pass_index = 0;
+    while (i < n && !sock->sniffed) {
+        switch (sock->pop3->pop3_state) {
+            case POP3_READING_COMMAND:
+                if (ptr[i] == ' ' && !strncmp(to_upper_case((char*) ptr, 4), "USER", 4)) {
+                    sock->pop3->pop3_state = POP3_READING_USER;
+                    i++;
+                }else if (ptr[i] == ' ' && !strncmp(to_upper_case((char*) ptr, 4), "PASS", 4)) {
+                    sock->pop3->pop3_state = POP3_READING_PASSWORD;
+                    i++;
+                } else {
+                    i++;
+                }
+                break;
+            case POP3_READING_USER:
+                if (ptr[i] == '\r') {
+                    sock->pop3->pop3_state = POP3_READING_COMMAND;
+                    sock->pop3->user_done = true;
+                    i++;
+                } else {
+                    sock->pop3->user[user_index++] = ptr[i];
+                    i++;
+                }
+                break;
+            case POP3_READING_PASSWORD:
+                if (ptr[i] == '\r') {
+                    sock->pop3->pop3_state = POP3_PARSER_DONE;
+                    sock->pop3->pass_done = true;
+                    i++;
+                } else {
+                    sock->pop3->pass[pass_index++] = ptr[i];
+                    i++;
+                }
+                break;
+            case POP3_PARSER_DONE:
+                sock->sniffed = true;
+                plog(INFO, "Sniffed POP3 user \"%s\" with pass \"%s\"", sock->pop3->user, sock->pop3->pass);
+                i++;
+                break;
+
+        }
+
+    }
+}
 
 unsigned copy_read(struct selector_key * key){
     struct socks5 *sock = ATTACHMENT(key);
@@ -30,6 +109,13 @@ unsigned copy_read(struct selector_key * key){
         add_bytes(ret);
         buffer_write_adv(buff, ret);
         if(key->fd == sock->client_fd && !sock->sniffed && sock->isPop && get_disector()) {
+            if(sock->pop3 == NULL){
+                if(init_pop3_parsers(key) == ERROR) {
+                    return ERROR;
+                }
+            }
+            parse_pop3(key, buff);
+
             //TODO: parsear pop3 y extraer user y pass
         }
         if(!buffer_can_write(buff)){
