@@ -90,7 +90,11 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
                 usage(argv[0]);
                 break;
             case 'l':
-                args->socks_addr = optarg;
+                if(strlen(optarg) > 8) {
+                    args->socks_addr6 = optarg;
+                } else{
+                    args->socks_addr = optarg;
+                }           
                 break;
             case 'L':
                 args->mng_addr = optarg;

@@ -175,12 +175,6 @@ main(const int argc, const char **argv) {
 finally:
     if(ss != SELECTOR_SUCCESS) {
         plog(ERRORR, "%s: %s", err_msg, ss == SELECTOR_IO? strerror(errno) : selector_error(ss));
-        /*
-        fprintf(stderr, "%s: %s\n", (err_msg == NULL) ? "": err_msg,
-                                  ss == SELECTOR_IO
-                                      ? strerror(errno)
-                                      : selector_error(ss));
-        */
         ret = 2;
     } else if(err_msg) {
         perror(err_msg);
