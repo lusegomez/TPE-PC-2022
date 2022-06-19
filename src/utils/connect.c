@@ -26,6 +26,8 @@
 unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     struct socks5 * sock = ATTACHMENT(key);
     unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
+    int error = 0;
+    socklen_t len = sizeof(error);
     //Crear socket para origin
     sock->origin_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(sock->origin_fd < 0) {
@@ -47,7 +49,17 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
         switch (errno) {
             case EINPROGRESS:
                 if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_READ, key->data) != SELECTOR_SUCCESS){
+                    selector_unregister_fd(key->s, sock->origin_fd);
+                    close(sock->origin_fd);
+                    sock->origin_fd = -1;
                     state = GENERAL_SOCKS_SERVER_FAILURE;
+                    goto finally;
+                }
+                if(getsockopt(sock->origin_fd, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0) {
+                    selector_unregister_fd(key->s, sock->origin_fd);
+                    state = GENERAL_SOCKS_SERVER_FAILURE;
+                    close(sock->origin_fd);
+                    sock->origin_fd = -1;
                     goto finally;
                 }
 
@@ -72,8 +84,12 @@ unsigned connect_origin_ipv4(struct connect *conn, struct selector_key *key){
     }
     return RESPONSE_WRITING;
 finally:
+    if(sock->origin_fd > 0){
+        selector_unregister_fd(key->s, sock->origin_fd);
+        close(sock->origin_fd);
+        sock->origin_fd = -1;
+    }
     sock->request_read->status = state;
-    //response(sock, state);
     return RESPONSE_WRITING;
 
 }
@@ -82,22 +98,37 @@ finally:
 unsigned connect_origin_fqdn(struct selector_key *key){
     unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
     struct socks5 * sock = ATTACHMENT(key);
-
+    int error = 0;
+    socklen_t len = sizeof(error);
     struct addrinfo *rp;
-    for(rp = sock->origin_resolution; rp != NULL; rp = rp->ai_next){
+    for(rp = sock->origin_resolution; rp != NULL && sock->origin_fd == -1; rp = rp->ai_next){
         sock->origin_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (sock->origin_fd == -1) {    
+        if (sock->origin_fd == -1) {
+            close(sock->origin_fd);
+            sock->origin_fd = -1;
             continue;   //PRUEBO OTRO
         }
         if(selector_fd_set_nio(sock->origin_fd) < 0){
+            close(sock->origin_fd);
+            sock->origin_fd = -1;
             state = GENERAL_SOCKS_SERVER_FAILURE;
-            goto finally;
+            continue;
         }
         if(connect(sock->origin_fd, rp->ai_addr, rp->ai_addrlen) < 0) {
             if(errno == EINPROGRESS) {
                 if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_READ, key->data) != SELECTOR_SUCCESS){
+                    selector_unregister_fd(key->s, sock->origin_fd);
+                    close(sock->origin_fd);
+                    sock->origin_fd = -1;
                     state = GENERAL_SOCKS_SERVER_FAILURE;
-                    goto finally;
+                    continue;
+                }
+                if(getsockopt(sock->origin_fd, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0) {
+                    selector_unregister_fd(key->s, sock->origin_fd);
+                    state = HOST_UNREACHABLE;
+                    close(sock->origin_fd);
+                    sock->origin_fd = -1;
+                    continue;
                 }
                 sock->request_read->status = SUCCEDED;
                 return RESPONSE_WRITING;
@@ -109,6 +140,9 @@ unsigned connect_origin_fqdn(struct selector_key *key){
     }
     if (rp == NULL)
     {
+        selector_unregister_fd(key->s, sock->origin_fd);
+        close(sock->origin_fd);
+        sock->origin_fd = -1;
         state = HOST_UNREACHABLE;
     }
 finally:
@@ -118,11 +152,13 @@ finally:
         sock->origin_fd = -1;
     }
     sock->request_read->status = state;
-    return state;
+    return RESPONSE_WRITING;
 }   
 unsigned connect_origin_ipv6(struct connect * conn, struct selector_key *key){
     struct socks5 * sock = ATTACHMENT(key);
     unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
+    int error = 0;
+    socklen_t len = sizeof(error);
     //Crear socket para origin
     sock->origin_fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
     if(sock->origin_fd < 0) {
@@ -144,7 +180,15 @@ unsigned connect_origin_ipv6(struct connect * conn, struct selector_key *key){
         switch (errno) {
             case EINPROGRESS:
                 if(selector_register(key->s, sock->origin_fd, &socks5_active_handler, OP_READ, key->data) != SELECTOR_SUCCESS){
+                    selector_unregister_fd(key->s, sock->origin_fd);
                     state = GENERAL_SOCKS_SERVER_FAILURE;
+                    goto finally;
+                }
+                if(getsockopt(sock->origin_fd, SOL_SOCKET, SO_ERROR, &error, &len) < 0 || error != 0) {
+                    selector_unregister_fd(key->s, sock->origin_fd);
+                    state = GENERAL_SOCKS_SERVER_FAILURE;
+                    close(sock->origin_fd);
+                    sock->origin_fd = -1;
                     goto finally;
                 }
 
@@ -169,6 +213,11 @@ unsigned connect_origin_ipv6(struct connect * conn, struct selector_key *key){
     }
     return RESPONSE_WRITING;
     finally:
+    if(sock->origin_fd > 0){
+        selector_unregister_fd(key->s, sock->origin_fd);
+        close(sock->origin_fd);
+        sock->origin_fd = -1;
+    }
     sock->request_read->status = state;
     //response(sock, state);
     return RESPONSE_WRITING;
