@@ -211,7 +211,13 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
             if(status) {
                 plog(INFO, "User deleted\n");
             } else {
-                plog(INFO, "Server error deleting user\n");
+                char * error_message = strtok(NULL, " ");
+                int error_code = error_message[0] - '0';
+                if(error_code) {
+                    plog(INFO, "User does not exist\n");
+                } else {
+                    plog(INFO, "Server error deleting user\n");
+                }
             }
             break;
         case LIST_USERS:

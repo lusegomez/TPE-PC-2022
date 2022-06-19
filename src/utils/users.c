@@ -60,7 +60,7 @@ int add_user(struct users * usr){
 int delete_user(char * username){
     if(total_users == 0){
         plog(ERRORR, "Error deleting user %s", username);
-        return -1;
+        return -2;
     }
 
     for(int i = 0; i < total_users; i++) {
@@ -75,7 +75,7 @@ int delete_user(char * username){
             return 0;
         }
     }
-    return 0;
+    return -2;
 }
 
 bool can_login(uint8_t * user, uint8_t * pass){

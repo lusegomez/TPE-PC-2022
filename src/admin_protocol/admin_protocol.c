@@ -450,9 +450,12 @@ parse_command(struct selector_key * key) {
             memcpy(ptr, message, strlen(message));
             buffer_write_adv(buff, strlen(message));
             break;
-        case DELETE_USER:
-            if(delete_user(arg) == -1){
-                message = "-7 \n";
+        case DELETE_USER: ;
+            int status = delete_user(arg);
+            if(status == -1){
+                message = "-7 0\n";
+            } else if(status == -2) {
+                message = "-7 1\n";
             } else {
                 message = "+7 \n";
             }
@@ -475,7 +478,7 @@ parse_command(struct selector_key * key) {
             admin->state = COMMANDS;
             memcpy(ptr, message, strlen(message));
             buffer_write_adv(buff, strlen(message));
-
+            free(user_list);
             break;
         default:
             message = "-ERR \n";
