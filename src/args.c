@@ -72,7 +72,6 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
 
 
     args->mng_addr   = "127.0.0.1";
-    args->mng_addr6   = "::";
     args->mng_port   = 8080;
 
     args->disectors_enabled = true;
@@ -90,14 +89,18 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
                 usage(argv[0]);
                 break;
             case 'l':
-                if(strlen(optarg) > 8) {
+                if(strlen(optarg) > 9) {
                     args->socks_addr6 = optarg;
                 } else{
                     args->socks_addr = optarg;
                 }           
                 break;
             case 'L':
-                args->mng_addr = optarg;
+                if(strlen(optarg)> 9){
+                    args->mng_addr6 = optarg;
+                } else {
+                    args->mng_addr = optarg;
+                }
                 break;
             case 'N':
                 args->disectors_enabled = false;
