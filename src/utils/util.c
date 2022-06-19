@@ -211,3 +211,16 @@ char *getDateTime() {
     strftime(dateTime, 20, "%d-%m-%Y %H:%M:%S", timeinfo);
     return dateTime;
 }
+
+//function that recieves ip address as string and returns type of address
+int getAddressType(char *ipAddress) {
+    struct sockaddr_in sa;
+    struct sockaddr_in6 sa6;
+    if(inet_pton(AF_INET, ipAddress, &(sa.sin_addr)) == 1) {
+        return AF_INET;
+    } else if(inet_pton(AF_INET6, ipAddress, &(sa6.sin6_addr)) == 1) {
+        return AF_INET6;
+    } else {
+        return -1;
+    }
+}

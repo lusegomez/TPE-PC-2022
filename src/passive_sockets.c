@@ -9,6 +9,9 @@ int create_passive_socket_ipv4(int * s, struct socks5args args){
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
+    if(args.socks_addr == NULL){
+        return -2;
+    }
     if(inet_pton(AF_INET, args.socks_addr, &addr.sin_addr) == 0) {
         //TODO: manejar error
         return -1;
@@ -45,6 +48,9 @@ int create_passive_socket_ipv6(int * s, struct socks5args args){
     struct sockaddr_in6 addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family = AF_INET6;
+    if(args.socks_addr6 == NULL){
+        return -2;
+    }
     if(inet_pton(AF_INET6, args.socks_addr6, &addr.sin6_addr) == 0) {
         //TODO: manejar error
         printf("a");
@@ -88,6 +94,9 @@ int create_passive_socket_mngt_ipv4( int * s, struct socks5args args){
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
+    if(args.mng_addr == NULL){
+        return -2;
+    }
     if(inet_pton(AF_INET, args.mng_addr, &addr.sin_addr) == 0) {
         //TODO: manejar error
         return -1;
@@ -123,7 +132,7 @@ int create_passive_socket_mngt_ipv6(int * s, struct socks5args args){
     struct sockaddr_in6 addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family = AF_INET6;
-    if(args.mng_addr6 == NULL) return -1;
+    if(args.mng_addr6 == NULL) return -2;
     if(inet_pton(AF_INET6, args.mng_addr6, &addr.sin6_addr) == 0) {
         //TODO: manejar error
         printf("a");

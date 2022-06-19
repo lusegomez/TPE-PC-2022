@@ -6,6 +6,7 @@
 #include <getopt.h>
 
 #include "./includes/args.h"
+#include "./utils/includes/util.h"
 
 static unsigned short
 port(const char *s) {
@@ -89,17 +90,27 @@ parse_args(const int argc, char **argv, struct socks5args *args) {
                 usage(argv[0]);
                 break;
             case 'l':
-                if(strlen(optarg) > 9) {
+                if(getAddressType(optarg) == AF_INET6) {
                     args->socks_addr6 = optarg;
-                } else{
+                    args->socks_addr = NULL;
+                } else if (getAddressType(optarg) == AF_INET) {
                     args->socks_addr = optarg;
-                }           
+                    args->socks_addr6 = NULL;
+                } else {
+                    fprintf(stderr, "Invalid proxy address: %s\n", optarg);
+                    exit(1);
+                }
                 break;
             case 'L':
-                if(strlen(optarg)> 9){
+                if(getAddressType(optarg) == AF_INET6) {
                     args->mng_addr6 = optarg;
-                } else {
+                    args->mng_addr = NULL;
+                } else if (getAddressType(optarg) == AF_INET) {
                     args->mng_addr = optarg;
+                    args->mng_addr6 = NULL;
+                } else {
+                    fprintf(stderr, "Invalid management address: %s\n", optarg);
+                    exit(1);
                 }
                 break;
             case 'N':

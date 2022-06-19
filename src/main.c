@@ -68,19 +68,19 @@ main(const int argc, const char **argv) {
 
     int error_ipv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
     if(error_ipv4 == -1) {
-        plog(INFO, "%s ", "Error creating socket IPv4");
+        plog(ERROR, "%s ", "Error creating socket IPv4");
     }
     int error_ipv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
     if(error_ipv6 == -1) {
-        plog(INFO, "%s ", "Error creating socket IPv6");
+        plog(ERROR, "%s ", "Error creating socket IPv6");
     }
     int error_mngt_ipv4 = create_passive_socket_mngt_ipv4(&passive_socket_mngt_ipv4, args);
     if(error_mngt_ipv4 == -1){
-        plog(INFO, "%s ", "Error creating socket  SCTP IPv4");
+        plog(ERROR, "%s ", "Error creating socket  SCTP IPv4");
     }
     int error_mngt_ipv6 = create_passive_socket_mngt_ipv6(&passive_socket_mngt_ipv6, args);
     if(error_mngt_ipv6 == -1){
-        plog(INFO, "%s ", "Error creating socket  SCTP IPv6");
+        plog(ERROR, "%s ", "Error creating socket  SCTP IPv6");
     }
     if ((error_ipv4 == -1 && error_ipv6 == -1) || (error_mngt_ipv4 == -1 && error_mngt_ipv6 == -1))
     {
@@ -124,25 +124,25 @@ main(const int argc, const char **argv) {
     bool ipv6_flag = false;
     bool ipv4_mngt_flag = false;
     bool ipv6_mngt_flag = false;
-    if(passive_socket_ipv4 != -1){
+    if(passive_socket_ipv4 >=0){
         ss = selector_register(selector, passive_socket_ipv4, &socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv4_flag = true;
         }
     }
-    if(passive_socket_ipv6 != -1){
+    if(passive_socket_ipv6 >=0){
         ss = selector_register(selector, passive_socket_ipv6, &socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv6_flag = true;
         }
     }
-    if(passive_socket_mngt_ipv4 != -1){
+    if(passive_socket_mngt_ipv4 >=0){
         ss = selector_register(selector, passive_socket_mngt_ipv4, &mngt_socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv4_mngt_flag = true;
         }
     }
-    if(passive_socket_mngt_ipv6 != -1){
+    if(passive_socket_mngt_ipv6 >=0){
         ss = selector_register(selector, passive_socket_mngt_ipv6, &mngt_socksv5, OP_READ, NULL);
         if(ss != SELECTOR_SUCCESS) {
             ipv6_mngt_flag = true;
