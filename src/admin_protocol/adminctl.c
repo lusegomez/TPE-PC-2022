@@ -151,25 +151,84 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
         return 0;
     }
 
-//    switch (command) {
-//        case STATSC:
-//            if(in_buff[0] == '+') {
-//                printf(in_buff+1);
-//            } else if (in_buff[0] == '-') {
-//                printf("Failed to get stats\n");
-//            }
-//            break;
-//        case LOGOUTC:
-//            if(in_buff[0] == '+') {
-//                printf("Logging out...\n");
-//            } else if (in_buff[0] == '-') {
-//                printf("Failed to log out\n");
-//            }
-//            break;
-//        case HELPC:
-//            printf(help_message);
-//            break;
-//    }
+    char * status_and_command = strtok(in_buff, " ");
+    int status = status_and_command[0] == '+';
+    status_and_command +=1;
+    int rec_command = atoi(status_and_command);
+
+    switch (rec_command) {
+        case STATSC:
+            if(status) {
+                plog(INFO, "STATS:\nTotal conections: %s \nCurrent connections: %s\n Total bytes transfered: %s", strtok(NULL, " "), strtok(NULL, " "), strtok(NULL, " "));
+            } else {
+                plog(INFO, "Server error recieving stats\n");
+            }
+             break;
+        case LOGOUTC:
+            if(status) {
+                plog(INFO, "Connection closed\n");
+            } else {
+                plog(INFO, "Server error closing connection\n");
+            }
+            break;
+        case DISECTOR_ACTIVATION:
+            if(status) {
+                plog(INFO, "Disector status updated\n");
+            } else {
+                plog(INFO, "Server error setting disector status\n");
+            }
+            break;
+        case GET_DISECTOR:
+            if(status) {
+                plog(INFO, "Disector status: %s\n", strtok(NULL, " "));
+            } else {
+                plog(INFO, "Server error getting disector status\n");
+            }
+            break;
+        case ADD_USER:
+            if(status) {
+                plog(INFO, "User added\n");
+            } else {
+                char * error_message = strtok(NULL, " ");
+                int error_code = error_message[0] - '0';
+                switch (error_code) {
+                    case 0:
+                        plog(INFO, "Server error adding user\n");
+                        break;
+                    case 1:
+                        plog(INFO, "User already exists\n");
+                        break;
+                    case 2:
+                        plog(INFO, "Max amount of users reached\n");
+                        break;
+                    case 3:
+                        plog(INFO, "Invalid user\n");
+                        break;
+                }
+            }
+            break;
+        case DELETE_USER:
+            if(status) {
+                plog(INFO, "User deleted\n");
+            } else {
+                plog(INFO, "Server error deleting user\n");
+            }
+            break;
+        case LIST_USERS:
+            if(status) {
+                plog(INFO, "Users:\n");
+                char * user = strtok(NULL, " ");
+                while (user != NULL) {
+                    plog(INFO, "\t%s", user);
+                    user = strtok(NULL, " ");
+                }
+            } else {
+                plog(INFO, "Server error listing users\n");
+            }
+            break;
+        default:
+            break;
+    }
 
     return 1;
 }
