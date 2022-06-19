@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../../includes/buffer.h"
+#include "../../utils/includes/logger.h"
 
 #define PROXY_SOCKS5_V5     0x05
 
