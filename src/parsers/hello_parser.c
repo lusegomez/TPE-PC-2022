@@ -13,6 +13,7 @@ enum hello_state consume_hello_byte(uint8_t c, struct hello_parser * hp){
             if(c == PROXY_SOCKS5_V5){
                 hp->state = hello_reading_nmethods;
             } else {
+                plog(ERRORR, "Invalid socks version: %d", c);
                 hp->state = hello_error;
             }
             break;
