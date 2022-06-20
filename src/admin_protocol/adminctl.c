@@ -159,7 +159,10 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
     switch (rec_command) {
         case STATSC:
             if(status) {
-                plog(INFO, "STATS:\nTotal conections: %s \nCurrent connections: %s\n Total bytes transfered: %s", strtok(NULL, " "), strtok(NULL, " "), strtok(NULL, " "));
+                char * total_connections = strtok(NULL, " ");
+                char * current_connections = strtok(NULL, " ");
+                char * total_bytes_transfered = strtok(NULL, " ");
+                plog(INFO, "STATS:\nTotal conections: %s \nCurrent connections: %s\nTotal bytes transfered: %s", total_connections, current_connections, total_bytes_transfered);
             } else {
                 plog(INFO, "Server error recieving stats\n");
             }
