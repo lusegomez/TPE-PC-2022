@@ -262,17 +262,18 @@ void socksv5_pool_destroy(){
     }
 }
 void socksv5_passive_accept(struct selector_key * key) {
-
+    int client_sock = -1;
+    struct socks5 * state = NULL;
     if(get_concurrent() == MAX_POOL){
         plog(ERRORR, "Max pool reached");
         goto fail;
     }
     struct sockaddr_storage new_client;
     socklen_t new_client_len = sizeof(new_client);
-    struct socks5 * state = NULL;
 
 
-    int client_sock = accept(key->fd, (struct sockaddr * )&new_client, &new_client_len);
+
+    client_sock = accept(key->fd, (struct sockaddr * )&new_client, &new_client_len);
     if(client_sock == -1) {
         goto fail;
     }
