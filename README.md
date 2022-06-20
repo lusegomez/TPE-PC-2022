@@ -14,7 +14,7 @@
  
  * [**Cliente**](#client)
   
-[**Documentación del servidor de monitoreo**](#mng-doc)
+[**Documentación del proyecto**](#mng-doc)
 
 <a name="descripcion"></a>
 ## Descripción del proyecto
@@ -109,3 +109,5 @@ man ./socks5dctl.8
 <a name="mng-doc"></a>
 ## Documentación del servidor de monitoreo
 La documentacion del servidor de monitoreo se encuentra ubicada en el archivo [Protocolo de monitoreo.pdf](https://github.com/lusegomez/TPE-PC-2022/blob/main/Protocolo%20de%20monitoreo.pdf)
+## Documentación del proxy
+La documentacion del proxy se encuentra ubicada en el archivo [Protocolos de comunicacion - TPE.pdf](https://github.com/lusegomez/TPE-PC-2022/blob/main/Protocolos%20de%20comunicaci%C3%B3n%20-%20TPE.pdf)
