@@ -108,4 +108,4 @@ man ./socks5dctl.8
 
 <a name="mng-doc"></a>
 ## Documentación del servidor de monitoreo
-La documentacion del servidor de monitoreo se encuentra ubicada en el archivo ([Protocolo de monitoreo.pdf](https://github.com/lusegomez/TPE-PC-2022/blob/main/Protocolo%20de%20monitoreo.pdf))
+La documentacion del servidor de monitoreo se encuentra ubicada en el archivo [Protocolo de monitoreo.pdf](https://github.com/lusegomez/TPE-PC-2022/blob/main/Protocolo%20de%20monitoreo.pdf)
