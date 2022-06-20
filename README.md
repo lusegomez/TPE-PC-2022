@@ -49,7 +49,7 @@ make clean
 ## Instrucciones para el uso
 <a name="server"></a>
 ### Servidor
-Para ejecutar el servidor se debe ejecutar el siguiente comando:
+Para ejecutar el servidor se debe ejecutar el siguiente comando en el directorio src del proyecto:
 ```bash
 ./socks5d <options>
 ```
@@ -77,7 +77,7 @@ OPCIONES
 
        -v     Imprime información sobre la versión versión y termina.
 ```
-Las distintas opciones estan especificadas en su manual (socks5d.8). Para acceder a él, se debe ejecutar el siguiente comando:
+Las distintas opciones estan especificadas en su manual (socks5d.8). Para acceder a él, se debe ejecutar el siguiente comando en el directorio src del proyecto:
 ```bash
 man ./socks5d.8
 ```
