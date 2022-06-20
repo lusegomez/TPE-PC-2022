@@ -50,7 +50,11 @@ man ./socks5d.8
 ```
 
 ### Cliente
-Para ejecutar el cliente se debe ejecutar el siguiente comando:
+Para ejecutar el cliente se debe instalar la siguiente libreria:
+```bash
+sudo apt install libsctp-dev
+```
+Y luego ejecutar el siguiente comando:
 ```bash
 ./socks5dctl <options>
 ```
