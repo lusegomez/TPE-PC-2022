@@ -5,6 +5,7 @@
 
 void request_read_parser_init(struct request_read_parser *rp) {
     rp->state = request_reading_version;
+    rp->destaddr = NULL;
     rp->version = 0;
     rp->command = 0;
     rp->destaddr_len = 0;
