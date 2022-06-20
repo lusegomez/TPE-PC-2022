@@ -27,7 +27,7 @@ make all
 
 Además, se puede especificar el compilador a utilizar, por ejemplo:
 ```bash
-make cc=gcc all 
+CC=gcc make all 
 ```
 
 Esto genera todos los archivos binarios necesarios para ejecutarlo.
