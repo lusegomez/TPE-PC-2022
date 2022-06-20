@@ -108,4 +108,4 @@ man ./socks5dctl.8
 
 <a name="mng-doc"></a>
 ## Documentación del servidor de monitoreo
-La documentacion del servidor de monitoreo se encuentra ubicada en el archivo [informe](#Protocolo de monitoreo.pdf)
+La documentacion del servidor de monitoreo se encuentra ubicada en el archivo [informe](Protocolo de monitoreo.pdf)
