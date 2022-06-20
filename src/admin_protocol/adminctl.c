@@ -51,7 +51,7 @@ static int isCommand(char * name){
 char * help_message = "These are all available commmands:\n"
                       "STATS\n\tPrints useful statistics about the proxy server\n"
                       "CLOSE_CONNECTION\n\tDisconnects admin client\n"
-                      "DISECTOR_ACTIVATION\n\tActivates or deactivates the disector\n"
+                      "DISECTOR_ACTIVATION <+/->\n\tActivates or deactivates the disector\n"
                       "GET_DISECTOR\n\tGets disector status\n"
                       "ADD_USER <user:pass>\n\tAdds a new user to the system\n"
                       "DELETE_USER <user>\n\tDeletes a user from the system\n"
