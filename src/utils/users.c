@@ -36,8 +36,8 @@ int add_user(struct users * usr){
     }
 
 
-    size_t name_len = strlen(usr->name) + 1;
-    size_t pass_len = strlen(usr->pass) + 1;
+    int name_len = strlen(usr->name) + 1;
+    int pass_len = strlen(usr->pass) + 1;
     for(int j = 0; j < pass_len; j++){
         if(usr->pass[j] == ':'){
             plog(ERRORR, "Error adding user %s, contains ':' in password", usr->name);

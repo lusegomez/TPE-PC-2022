@@ -47,7 +47,7 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
     struct socks5 *sock = ATTACHMENT(key);
     size_t n = 0;
     uint8_t *ptr = buffer_read_ptr(buffer, &n);
-    int i = 0;
+    size_t i = 0;
     while (i < n && !sock->sniffed) {
         switch (sock->pop3->pop3_state) {
             case POP3_READING_COMMAND:
