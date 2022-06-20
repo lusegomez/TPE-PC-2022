@@ -13,31 +13,17 @@ socks5dclt \- cliente del protocolo para el monitoreo del proxy SOCKS version 5 
 
 .SH SINOPSIS
 .HP 10
-.B  socks5dctl
+.B  socks5dctl [ POSIX style options ]
 
 .SH OPCIONES
 
-.IP "\fBHELP\fR"
-Imprime la lista de comandos del cliente.
+.IP "\fB\-L\fB \fIdirección-de-management\fR"
+  Establece la dirección donde sirve el servicio de
+  management. Por defecto usa localhost.
 
-.IP "\fBSTATS\fR"
-Imprime las estadisticas almacenadas en el proxy
+.IP "\fB\-P\fB \fIpuerto-conf\fR"
+  Puerto SCTP  donde escucha el protocolo
+  de configuración. Por defecto el valor es \fI8080\fR.
 
-.IP "\fBCLOSE_CONNECTION\fR"
-Cierra la conexion del cliente.
-
-.IP "\fBDISECTOR_ACTIVATION\fB \fIopcion\fR"
-Activa el disector si la opcion es '+'. Lo desactiva si es un '-'.
-
-.IP "\fBGET_DISECTOR\fR"
-Imprime si el disector esta activado.
-
-.IP "\fBADD_USER\fB \fI<user:password>\fR"
-Agrega el usuario que recibe como argumento.
-
-.IP "\fBDELETE_USER\fB \fI<user>\fR"
-Elimina el usuario que recibe como argumento.
-
-.IP "\fBLIST_USER\fR"
-Imprime la lista de usuarios almacenados en el proxy.
-
+.IP "\fB-h\fR"
+  Imprime la ayuda y termina.
