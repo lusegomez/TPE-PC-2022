@@ -3,7 +3,7 @@
 
 #include <sys/socket.h>
 
-#define BUFF_SIZE 2048
+#define BUFF_SIZE 4096
 
 typedef enum address_type {
     ADDR_IPV4   = 0x01,

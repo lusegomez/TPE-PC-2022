@@ -29,7 +29,7 @@
 
 #define N(x)                (sizeof(x)/sizeof((x)[0]))
 #define ADMIN_ATTACHMENT(key)     ( ( struct admin * )(key)->data)
-#define BUFFERSIZE 2048
+#define BUFFERSIZE 4096
 
 typedef enum command_parser_states
 {
@@ -63,7 +63,7 @@ typedef struct admin
     socklen_t                     client_addr_len;
 
     buffer read_buffer, write_buffer;
-    uint8_t raw_buff_a[2048], raw_buff_b[2048];
+    uint8_t raw_buff_a[BUFFERSIZE], raw_buff_b[BUFFERSIZE];
     struct state_machine stm;
     struct admin * next;
     unsigned                references;
