@@ -50,3 +50,11 @@ man ./socks5d.8
 ```
 
 ### Cliente
+Para ejecutar el cliente se debe ejecutar el siguiente comando:
+```bash
+./socks5dctl <options>
+```
+Las distintas opciones estan especificadas en su manual (socks5dctl.8). Para acceder a él, se debe ejecutar el siguiente comando:
+```bash
+man ./socks5dctl.8
+```
