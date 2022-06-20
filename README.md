@@ -4,6 +4,8 @@
 
 [**Descripción del proyecto**](#descripcion)
 
+[**Dependencias**](#dependencias)
+
 [**Instalación**](#instalacion)
 
 [**Instrucciones para el uso**](#instrucciones)
@@ -17,6 +19,13 @@
 <a name="descripcion"></a>
 ## Descripción del proyecto
 El objetivo del trabajo es implementar un servidor proxy para el protocolo SOCKSv5[RFC1928], el cual puede atender multiples clientes en forma concurrente y simultanea.
+
+<a name="dependencias"></a>
+## Dependencias
+El proyecto requiere, como unica dependencia, la libreria libsctp-dev para la utilizacion del protocolo SCTP. Para distribuciones basadas en debian ejecutar el siguiente comando:
+```bash
+sudo apt install libsctp-dev
+```
 
 <a name="instalacion"></a>
 ## Instalación
@@ -50,10 +59,6 @@ man ./socks5d.8
 ```
 
 ### Cliente
-Para ejecutar el cliente se debe instalar la siguiente libreria:
-```bash
-sudo apt install libsctp-dev
-```
 Y luego ejecutar el siguiente comando:
 ```bash
 ./socks5dctl <options>
