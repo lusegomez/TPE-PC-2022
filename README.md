@@ -53,6 +53,30 @@ Para ejecutar el servidor se debe ejecutar el siguiente comando:
 ```bash
 ./socks5d <options>
 ```
+Donde options puede ser una o mas opciones de las siguientes:
+```bash
+OPCIONES
+       -h     Imprime la ayuda y termina.
+
+       -l dirección-socks
+              Establece la dirección donde servirá el proxy SOCKS.  Por defecto escucha en todas las                  interfaces.
+
+       -N     Deshabilita los passwords disectors.
+
+       -L dirección-de-management
+              Establece la dirección donde servirá el servicio de management. Por defecto escucha                     únicamente en loopback.
+
+       -p puerto-local
+              Puerto TCP donde escuchará por conexiones entrantes SOCKS.  Por defecto el valor es 1080.
+
+       -P puerto-conf
+              Puerto SCTP  donde escuchará por conexiones entrante del protocolo de configuración. Por                defecto el valor es 8080.
+
+       -u user:pass
+              Declara un usuario del proxy con su contraseña. Se puede utilizar hasta 10 veces.
+
+       -v     Imprime información sobre la versión versión y termina.
+```
 Las distintas opciones estan especificadas en su manual (socks5d.8). Para acceder a él, se debe ejecutar el siguiente comando:
 ```bash
 man ./socks5d.8
