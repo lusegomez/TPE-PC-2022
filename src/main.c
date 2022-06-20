@@ -51,7 +51,6 @@ main(const int argc, const char **argv) {
 
     init_admin_data();
 
-
     // no tenemos nada que leer de stdin
     close(0);
 

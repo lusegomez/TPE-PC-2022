@@ -101,6 +101,10 @@ unsigned connect_origin_fqdn(struct selector_key *key){
     int error = 0;
     socklen_t len = sizeof(error);
     struct addrinfo *rp;
+    if(sock->origin_resolution == NULL){
+        state = HOST_UNREACHABLE;
+        goto finally;
+    }
     for(rp = sock->origin_resolution; rp != NULL && sock->origin_fd == -1; rp = rp->ai_next){
         sock->origin_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (sock->origin_fd == -1) {
@@ -133,7 +137,20 @@ unsigned connect_origin_fqdn(struct selector_key *key){
                 sock->request_read->status = SUCCEDED;
                 return RESPONSE_WRITING;
             } else {
-                state = GENERAL_SOCKS_SERVER_FAILURE;
+                switch (errno) {
+                    case ECONNREFUSED:
+                        state = CONNECTION_REFUSED;
+                        break;
+                    case EHOSTUNREACH:
+                        state = HOST_UNREACHABLE;
+                        break;
+                    case ENETUNREACH:
+                        state = NETWORK_UNREACHABLE;
+                        break;
+                    default:
+                        state = GENERAL_SOCKS_SERVER_FAILURE;
+                        break;
+                }
                 goto finally;
             }
         }
@@ -143,7 +160,6 @@ unsigned connect_origin_fqdn(struct selector_key *key){
         selector_unregister_fd(key->s, sock->origin_fd);
         close(sock->origin_fd);
         sock->origin_fd = -1;
-        state = HOST_UNREACHABLE;
     }
 finally:
     if(sock->origin_fd > 0) {

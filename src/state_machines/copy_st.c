@@ -2,7 +2,14 @@
 #include "./includes/copy_st.h"
 
 #define ATTACHMENT(key)     ( ( struct socks5 * )(key)->data)
+#define IPV4 0x01
+#define FQDN 0x03
+#define IPV6 0x04
 
+#define POP3PORT 110
+
+#define INET_ADDRSTRLEN 16
+#define INET6_ADDRSTRLEN 46
 
 //Check if socket connection was closed
 bool is_socket_closed(int fd){
@@ -112,7 +119,13 @@ void parse_pop3(struct selector_key * key, buffer * buffer) {
                     sock->pop3->cmd[0] = '\0';
                     sock->pop3->user_index = 0;
                     sock->pop3->pass_index = 0;
-                    plog(INFO, "Sniffed POP3 user \"%s\" with pass \"%s\"", sock->pop3->user, sock->pop3->pass);
+                    char buff[INET6_ADDRSTRLEN]={0};
+                    if(sock->request_read->req_parser->atype != FQDN){
+                        inet_ntop(sock->request_read->req_parser->atype == IPV4 ? AF_INET : AF_INET6, sock->request_read->req_parser->destaddr, buff, sock->request_read->req_parser->atype == IPV4 ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
+                    }
+                    plog(INFO, "\t%s\tP\tPOP3\t%s\t110\t%s\t%s",sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
+                         sock->request_read->req_parser->atype == FQDN ? (char *)sock->request_read->req_parser->destaddr : buff,
+                         sock->pop3->user, sock->pop3->pass);
                 }
                 i++;
                 break;

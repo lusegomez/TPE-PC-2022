@@ -205,10 +205,10 @@ sockaddr_to_human(char *buff, const size_t buffsize,
 char *getDateTime() {
     time_t rawtime;
     struct tm * timeinfo;
-    char *dateTime = malloc(sizeof(char) * 20);
+    char *dateTime = malloc(sizeof(char) * 25);
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    strftime(dateTime, 20, "%d-%m-%Y %H:%M:%S", timeinfo);
+    strftime(dateTime, 25, "%Y-%m-%dT%H:%M:%SZ", timeinfo);
     return dateTime;
 }
 
@@ -220,6 +220,34 @@ int getAddressType(char *ipAddress) {
         return AF_INET;
     } else if(inet_pton(AF_INET6, ipAddress, &(sa6.sin6_addr)) == 1) {
         return AF_INET6;
+    } else {
+        return -1;
+    }
+}
+
+//function that returns ip address as string from sockaddr_storage
+char *getIpAddress(struct sockaddr_storage *addr) {
+    char *ipAddress = malloc(sizeof(char) * INET6_ADDRSTRLEN);
+    if(addr->ss_family == AF_INET) {
+        struct sockaddr_in *ipv4Addr = (struct sockaddr_in *) addr;
+        inet_ntop(AF_INET, &(ipv4Addr->sin_addr), ipAddress, INET6_ADDRSTRLEN);
+    } else if(addr->ss_family == AF_INET6) {
+        struct sockaddr_in6 *ipv6Addr = (struct sockaddr_in6 *) addr;
+        inet_ntop(AF_INET6, &(ipv6Addr->sin6_addr), ipAddress, INET6_ADDRSTRLEN);
+    } else {
+        strcpy(ipAddress, "unknown");
+    }
+    return ipAddress;
+}
+
+//function that returns port number from sockaddr_storage
+int getPort(struct sockaddr_storage *addr) {
+    if(addr->ss_family == AF_INET) {
+        struct sockaddr_in *ipv4Addr = (struct sockaddr_in *) addr;
+        return ntohs(ipv4Addr->sin_port);
+    } else if(addr->ss_family == AF_INET6) {
+        struct sockaddr_in6 *ipv6Addr = (struct sockaddr_in6 *) addr;
+        return ntohs(ipv6Addr->sin6_port);
     } else {
         return -1;
     }

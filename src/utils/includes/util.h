@@ -15,6 +15,8 @@ const char * printProtocol(struct addrinfo *aip);
 void printFlags(struct addrinfo *aip);
 char * printAddressPort( const struct addrinfo *aip, char addr[]);
 int getAddressType(char *ipAddress);
+char *getIpAddress(struct sockaddr_storage *sa);
+int getPort(struct sockaddr_storage *sa);
 
 // Determina si dos sockets son iguales (misma direccion y puerto)
 int sockAddrsEqual(const struct sockaddr *addr1, const struct sockaddr *addr2);

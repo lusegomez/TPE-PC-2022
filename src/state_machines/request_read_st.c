@@ -153,24 +153,20 @@ unsigned response_write(struct selector_key * key){
 void connection_logger(struct socks5 * sock){
     struct request_read_st * rqst_st = sock->request_read;
     char buff[INET6_ADDRSTRLEN]={0};
+    char *clientaddr = getIpAddress(&sock->client_addr);
     if(rqst_st->req_parser->atype != FQDN){
         inet_ntop(rqst_st->req_parser->atype == IPV4 ? AF_INET : AF_INET6, rqst_st->req_parser->destaddr, buff, rqst_st->req_parser->atype == IPV4 ? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
     }
     if ((((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1]) == POP3PORT){
         sock->isPop = true;
     }
-
-    if(rqst_st->status == SUCCEDED){
-        plog(INFO, "%s accessed address %s port %d",
-             sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
-             rqst_st->req_parser->atype == FQDN ? (char *)rqst_st->req_parser->destaddr : buff,
-             ((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1]);
-    } else {
-        plog(INFO, "%s tried to access address %s port %d but failed (Error code %d)",
-             sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
-             rqst_st->req_parser->atype == FQDN ? (char *)rqst_st->req_parser->destaddr : buff,
-             ((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1],
-             rqst_st->status);
-    }
+    plog(INFO, "\t%s\tA\t%s\t%d\t%s\t%d\t%d",
+         sock->hello_auth->hello_auth_parser != NULL ? (char*)sock->hello_auth->hello_auth_parser->user : "Unknown user",
+         clientaddr,
+         getPort(&sock->client_addr),
+         rqst_st->req_parser->atype == FQDN ? (char *)rqst_st->req_parser->destaddr : buff,
+         ((uint16_t)rqst_st->req_parser->port[0] << 8) | rqst_st->req_parser->port[1],
+         rqst_st->status);
+    free(clientaddr);
 }
 
