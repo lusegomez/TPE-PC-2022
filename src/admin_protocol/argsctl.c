@@ -103,25 +103,25 @@ set_mgmt_address(struct address_data * address_data, const char * adress, struct
 
 
     struct sockaddr_in ipv4;
+    struct sockaddr_in6 ipv6;
     memset(&(ipv4), 0, sizeof(ipv4));
+    memset(&(ipv6), 0, sizeof(ipv6));
     ipv4.sin_family = AF_INET;
-    int result = 0;
 
-    if((result = inet_pton(AF_INET, adress, &ipv4.sin_addr.s_addr)) <= 0) {
-        address_data->mgmt_type   = ADDR_IPV6;
-        address_data->mgmt_domain  = AF_INET6;
-        address_data->mgmt_addr_len = sizeof(struct sockaddr_in6);
+    if(inet_pton(AF_INET, adress, &ipv4.sin_addr.s_addr) <= 0) {
+        if(inet_pton(AF_INET6, adress, &ipv6.sin6_addr) > 0){
+            address_data->mgmt_type   = ADDR_IPV6;
+            address_data->mgmt_domain  = AF_INET6;
+            address_data->mgmt_addr_len = sizeof(struct sockaddr_in6);
 
+            ipv6.sin6_family = AF_INET6;
 
-        struct sockaddr_in6 ipv6;
-
-        memset(&(ipv6), 0, sizeof(ipv6));
-
-        ipv6.sin6_family = AF_INET6;
-
-        ipv6.sin6_port = htons(opt->mgmt_port);
-        memcpy(&address_data->mgmt_addr, &ipv6, address_data->mgmt_addr_len);
-        return;
+            ipv6.sin6_port = htons(opt->mgmt_port);
+            memcpy(&address_data->mgmt_addr, &ipv6, address_data->mgmt_addr_len);
+            return;
+        } else {
+            return;
+        }
     }
     ipv4.sin_port = htons(opt->mgmt_port);
     memcpy(&address_data->mgmt_addr, &ipv4, address_data->mgmt_addr_len);

@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include "includes/argsctl.h"
 #include "../utils/includes/logger.h"
