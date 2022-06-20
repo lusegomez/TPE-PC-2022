@@ -59,18 +59,18 @@ OPCIONES
        -h     Imprime la ayuda y termina.
 
        -l dirección-socks
-              Establece la dirección donde servirá el proxy SOCKS.  Por defecto escucha en todas las                  interfaces.
+              Establece la dirección donde servirá el proxy SOCKS.  Por defecto escucha en todas las interfaces.
 
        -N     Deshabilita los passwords disectors.
 
        -L dirección-de-management
-              Establece la dirección donde servirá el servicio de management. Por defecto escucha                     únicamente en loopback.
+              Establece la dirección donde servirá el servicio de management. Por defecto escucha únicamente en loopback.
 
        -p puerto-local
               Puerto TCP donde escuchará por conexiones entrantes SOCKS.  Por defecto el valor es 1080.
 
        -P puerto-conf
-              Puerto SCTP  donde escuchará por conexiones entrante del protocolo de configuración. Por                defecto el valor es 8080.
+              Puerto SCTP  donde escuchará por conexiones entrante del protocolo de configuración. Por defecto el valor es 8080.
 
        -u user:pass
               Declara un usuario del proxy con su contraseña. Se puede utilizar hasta 10 veces.
@@ -86,6 +86,20 @@ man ./socks5d.8
 Y luego ejecutar el siguiente comando:
 ```bash
 ./socks5dctl <options>
+```
+Donde options puede ser una o mas opciones de las siguientes:
+```bash
+OPCIONES
+       -L dirección-de-management
+                Establece la dirección donde sirve el servicio de
+                management. Por defecto usa localhost.
+
+       -P puerto-conf
+                Puerto SCTP  donde escucha el protocolo
+                de configuración. Por defecto el valor es 8080.
+
+       -h
+                Imprime la ayuda y termina.
 ```
 Las distintas opciones estan especificadas en su manual (socks5dctl.8). Para acceder a él, se debe ejecutar el siguiente comando:
 ```bash
