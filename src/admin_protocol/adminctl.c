@@ -183,7 +183,7 @@ parse_command(int sock, char * in_buff, char * out_buffer) {
             break;
         case GET_DISECTOR:
             if(status) {
-                plog(INFO, "Disector status: %s\n", strtok(NULL, " "));
+                plog(INFO, "Disector status: %s\n", strcmp(strtok(NULL, " "),"+\n") == 0 ? "ON" : "OFF");
             } else {
                 plog(INFO, "Server error getting disector status\n");
             }
@@ -316,6 +316,7 @@ main(const int argc, char **argv) {
     }
     plog(INFO, "%s", help_message);
     while(!stop) {
+        printf("> ");
         parse_command(sock, incoming, out);
         if(close_flag){
             plog(INFO, "Logging out...\n");
