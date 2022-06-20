@@ -25,7 +25,7 @@ unsigned init_pop3_parsers(struct selector_key * key){
     if(sock->pop3 == NULL){
         sock->pop3 = calloc(1, sizeof(struct pop3_st));
         if(sock->pop3 == NULL){
-            plog(ERROR, "Error allocating memory for pop3 parser");
+            plog(ERRORR, "Error allocating memory for pop3 parser");
             return ERROR;
         }
     }

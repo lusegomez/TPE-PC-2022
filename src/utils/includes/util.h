@@ -1,6 +1,6 @@
 #ifndef UTIL_H_
 #define UTIL_H_
-
+#include <netdb.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/socket.h>

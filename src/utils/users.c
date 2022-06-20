@@ -6,7 +6,6 @@
 #define MAX_USER_PASS_LEN 255
 
 static int total_users = 0;
-static int total_admins = 0;
 
 static struct users * users = NULL;
 

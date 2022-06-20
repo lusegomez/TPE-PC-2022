@@ -67,19 +67,19 @@ main(const int argc, const char **argv) {
 
     int error_ipv4 = create_passive_socket_ipv4(&passive_socket_ipv4, args);
     if(error_ipv4 == -1) {
-        plog(ERROR, "%s ", "Error creating socket IPv4");
+        plog(ERRORR, "%s ", "Error creating socket IPv4");
     }
     int error_ipv6 = create_passive_socket_ipv6(&passive_socket_ipv6, args);
     if(error_ipv6 == -1) {
-        plog(ERROR, "%s ", "Error creating socket IPv6");
+        plog(ERRORR, "%s ", "Error creating socket IPv6");
     }
     int error_mngt_ipv4 = create_passive_socket_mngt_ipv4(&passive_socket_mngt_ipv4, args);
     if(error_mngt_ipv4 == -1){
-        plog(ERROR, "%s ", "Error creating socket  SCTP IPv4");
+        plog(ERRORR, "%s ", "Error creating socket  SCTP IPv4");
     }
     int error_mngt_ipv6 = create_passive_socket_mngt_ipv6(&passive_socket_mngt_ipv6, args);
     if(error_mngt_ipv6 == -1){
-        plog(ERROR, "%s ", "Error creating socket  SCTP IPv6");
+        plog(ERRORR, "%s ", "Error creating socket  SCTP IPv6");
     }
     if ((error_ipv4 == -1 && error_ipv6 == -1) || (error_mngt_ipv4 == -1 && error_mngt_ipv6 == -1))
     {

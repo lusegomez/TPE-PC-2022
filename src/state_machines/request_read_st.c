@@ -63,7 +63,7 @@ unsigned request_read(struct selector_key * key) {
     size_t nbytes;
     uint8_t * pointer = buffer_write_ptr(&sock->read_buffer, &nbytes); //Agarro el write pointer para escribir en el read_buff con el recv
     ssize_t ret = recv(key->fd, pointer, nbytes, 0);
-    unsigned state;
+    unsigned state = GENERAL_SOCKS_SERVER_FAILURE;
     if(ret > 0) {
         buffer_write_adv(&sock->read_buffer, ret);
         enum request_read_state ret_state = consume_request(&sock->read_buffer, rp);
