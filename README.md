@@ -67,3 +67,7 @@ Las distintas opciones estan especificadas en su manual (socks5dctl.8). Para acc
 ```bash
 man ./socks5dctl.8
 ```
+
+<a name="mng-doc"></a>
+## Documentación del servidor de monitoreo
+La documentacion del servidor de monitoreo se encuentra ubicada en el archivo "Protocolo de monitoreo.pdf"
