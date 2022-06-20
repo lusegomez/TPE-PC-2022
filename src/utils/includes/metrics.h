@@ -15,6 +15,8 @@ void add_concurrent(void);
 
 void remove_concurrent(void);
 
+int get_concurrent(void);
+
 void add_bytes(unsigned long bytes);
 
 bool get_disector(void);

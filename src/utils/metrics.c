@@ -26,6 +26,9 @@ void remove_concurrent(void){
     adminData->concurrent_connections--;
 }
 
+int get_concurrent(void){
+    return adminData->concurrent_connections;
+}
 
 void add_bytes(unsigned long bytes){
     adminData->bytes_transfered += bytes;

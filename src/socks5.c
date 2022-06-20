@@ -19,7 +19,9 @@
 #include "./includes/parser.h"
 #include "./utils/includes/logger.h"
 
+
 struct socks5 * pool = NULL;
+
 
 const struct state_definition states_definition[] = {
         {
@@ -260,6 +262,11 @@ void socksv5_pool_destroy(){
     }
 }
 void socksv5_passive_accept(struct selector_key * key) {
+
+    if(get_concurrent() == MAX_POOL){
+        plog(ERRORR, "Max pool reached");
+        goto fail;
+    }
     struct sockaddr_storage new_client;
     socklen_t new_client_len = sizeof(new_client);
     struct socks5 * state = NULL;
